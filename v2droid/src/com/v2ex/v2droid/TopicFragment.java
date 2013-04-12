@@ -155,7 +155,11 @@ public class TopicFragment extends SherlockFragment {
 			soundListener.addSoundEvent(State.RESET, R.raw.refresh);
 			mPullRefreshListView.setOnPullEventListener(soundListener);
 
-			setupTopicsUI(view);
+			//setupTopicsUI(view);
+			HtmlParser.getTopics("http://v2ex.com/?tab=all", topicList);
+			if (!topicList.isEmpty()) {
+				mAdapter.notifyDataSetChanged();
+			}		
 		} else {
 			view = inflater.inflate(R.layout.fragment_topic_type, null);
 			ListView listView = (ListView) view
@@ -182,7 +186,6 @@ public class TopicFragment extends SherlockFragment {
 		}
 
 		mContext = getActivity();
-
 	}
 
 	@Override
