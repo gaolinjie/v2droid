@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/list_selector"
+    android:orientation="horizontal"
+    android:padding="5dip" >
+
+	<!--  ListRow Left sied avatar image -->
+	<LinearLayout android:id="@+id/avatar" 
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:padding="3dip"		
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/image_bg" 
+	    android:layout_marginRight="5dip">
+        
+		<ImageView     
+			android:id="@+id/list_image"   
+	        android:layout_width="50dip"
+	        android:layout_height="50dip" />
+        
+	</LinearLayout>
+	
+	<!-- Username -->
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/avatar"
+        android:layout_toRightOf="@+id/avatar"       
+        android:textColor="#343434"
+        android:textSize="10dip"
+        android:layout_marginTop="1dip" />
+    
+    <!-- Node -->
+    <TextView
+        android:id="@+id/node"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/username"
+       android:layout_toRightOf="@id/username"           
+        android:textColor="#7b7670"
+        android:textSize="10dip"
+        android:layout_marginLeft="6dip"
+        android:background="@drawable/textview_node" />
+    
+	<!-- Title Of Topic-->
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/username"
+        android:layout_below="@id/username"
+        android:textColor="#54575a"
+        android:typeface="sans" 
+        android:textSize="15dip"
+        android:textStyle="bold" />	
+
+	<!-- Replies of Topic-->
+    <TextView
+        android:id="@+id/replies"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/username"
+        android:gravity="center"
+        android:textSize="10dip"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:background="@drawable/textview_style" />
+
+</RelativeLayout>

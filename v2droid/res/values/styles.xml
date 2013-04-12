@@ -1,0 +1,9 @@
+<resources>
+
+    <style name="AppTheme" parent="android:Theme.Light" />
+    
+    <style name="MyListView" parent="@android:style/Widget.ListView">
+        <item name="android:overScrollFooter">@color/fragment_menu_background</item>
+    </style>
+
+</resources>
