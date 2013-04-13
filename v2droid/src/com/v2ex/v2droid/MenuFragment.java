@@ -2,6 +2,7 @@ package com.v2ex.v2droid;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,8 +24,7 @@ public class MenuFragment extends SherlockFragment {
 	private static final String NAME_COLUMN = "name";
 	private static final String NUM_COLUMN = "num";
 	private static final String SUM_COLUMN = "sum";
-
-
+	public static final String SHOW_LOGIN = "com.v2ex.v2droid.action.SHOW_LOGIN";
 
 	Context mContext;
 
@@ -69,7 +69,14 @@ public class MenuFragment extends SherlockFragment {
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {				
+					long arg3) {
+				TextView txtTitleView = (TextView) arg1.findViewById(R.id.txtTitle);
+			    String txtTitle = txtTitleView.getText().toString();
+			    
+			    if (txtTitle == "账户") {
+			    	Intent intent = new Intent(SHOW_LOGIN);
+					mContext.startActivity(intent);
+			    }
 			}
 		});
 

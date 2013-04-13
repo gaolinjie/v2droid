@@ -41,7 +41,7 @@ public class TopicFragment extends SherlockFragment {
 
 	private final static String TAG = "TopicFragment";
 	private static final String KEY_CONTENT = "TopicFragment:Content";
-	public static final String SHOW_CONTENT = "me.zgeek.v2ex.ContentActivity.SHOW_CONTENT";
+	public static final String SHOW_CONTENT = "com.v2ex.v2droid.action.SHOW_CONTENT";
 
 	Context mContext;
 
@@ -95,6 +95,7 @@ public class TopicFragment extends SherlockFragment {
 	}
 
 	private String mContent = "???";
+	int recentPageNum = 1;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -259,18 +260,23 @@ public class TopicFragment extends SherlockFragment {
 		@Override
 		protected String[] doInBackground(Void... params) {
 			// Simulates a background job.
-			String[] s = { "Abbaye de Belloc", "Abbaye du Mont des Cats" };
-			try {
+			String[] s = { "A", "A" };
+			/*try {
 				Thread.sleep(4000);
 			} catch (InterruptedException e) {
-			}
+			}*/
+			//topicList.clear();
+			HtmlParser.getTopics("http://v2ex.com/recent?p="+recentPageNum, topicList);
 			return s;
 		}
 
 		@Override
 		protected void onPostExecute(String[] result) {
 			// mListItems.addFirst("Added after refresh...");
-			mAdapter.notifyDataSetChanged();
+			if (!topicList.isEmpty()) {
+				mAdapter.notifyDataSetChanged();
+				recentPageNum++;
+			}
 
 			// Call onRefreshComplete when the list has been refreshed.
 			mPullRefreshListView.onRefreshComplete();

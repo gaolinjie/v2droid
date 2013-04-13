@@ -25,9 +25,9 @@
             android:label="@string/title_activity_topic"
             android:theme="@style/Theme.VPI" >
             <intent-filter>
-                <action android:name="com.v2ex.v2droid.ContentActivity.SHOW_TOPIC" />
+                <action android:name="com.v2ex.v2droid.action.SHOW_TOPIC" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
@@ -35,7 +35,17 @@
             android:label="@string/title_activity_content"
             android:theme="@style/Theme.VPI" >
             <intent-filter>
-                <action android:name="com.v2ex.v2droid.ContentActivity.SHOW_CONTENT" />
+                <action android:name="com.v2ex.v2droid.action.SHOW_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/title_activity_login"
+            android:theme="@style/Theme.VPI" >
+            <intent-filter>
+                <action android:name="com.v2ex.v2droid.action.SHOW_LOGIN" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

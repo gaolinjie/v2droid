@@ -7,11 +7,8 @@ import android.os.Handler;
 
 public class Splash extends Activity {
 	
-	public static final String SHOW_CONTENT = "me.zgeek.v2ex.ContentActivity.SHOW_CONTENT";
+	public static final String SHOW_TOPIC = "com.v2ex.v2droid.action.SHOW_TOPIC";
 
-	/**
-	 * 延期时间
-	 */
 	private final int SPLASH_DISPLAY_LENGHT = 1000;
 
 	/** Called when the activity is first created. */
@@ -19,9 +16,7 @@ public class Splash extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.splash);
-		/**
-		 * 使用handler来处理
-		 */
+
 		new Handler().postDelayed(new Runnable() {
 
 			@Override

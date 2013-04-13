@@ -99,13 +99,13 @@ public final class R {
 		public static final int LinePageIndicator_centered = 1;
 	}
 	public static final class drawable {
-		public static final int vpi__tab_selected_pressed_holo = 0x7f0200ad;
-		public static final int vpi__tab_selected_focused_holo = 0x7f0200ab;
-		public static final int vpi__tab_selected_holo = 0x7f0200ac;
-		public static final int vpi__tab_unselected_focused_holo = 0x7f0200ae;
-		public static final int vpi__tab_unselected_holo = 0x7f0200af;
-		public static final int vpi__tab_indicator = 0x7f0200aa;
-		public static final int vpi__tab_unselected_pressed_holo = 0x7f0200b0;
+		public static final int vpi__tab_selected_pressed_holo = 0x7f0200ae;
+		public static final int vpi__tab_selected_focused_holo = 0x7f0200ac;
+		public static final int vpi__tab_selected_holo = 0x7f0200ad;
+		public static final int vpi__tab_unselected_focused_holo = 0x7f0200af;
+		public static final int vpi__tab_unselected_holo = 0x7f0200b0;
+		public static final int vpi__tab_indicator = 0x7f0200ab;
+		public static final int vpi__tab_unselected_pressed_holo = 0x7f0200b1;
 	}
 	public static final class attr {
 		public static final int footerIndicatorStyle = 0x7f010014;
