@@ -40,7 +40,7 @@ public class TopicFragment extends Fragment {
 	private ProgressBar progressBar;
 	private ProgressBar progressBar2;
 	
-	int recentPageNum = 1;
+	int recentPageNum = 0;
 
 	private static TopicFragment instance;
 
@@ -136,7 +136,13 @@ public class TopicFragment extends Fragment {
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
-			HtmlParser.getTopics("http://v2ex.com/recent?p="+recentPageNum, topicList);
+			String url;
+			if (recentPageNum == 0) {
+				url = "http://www.v2ex.com/?tab=all";
+			} else {
+				url = "http://v2ex.com/recent?p="+recentPageNum;	
+			}
+			HtmlParser.getTopics(url, topicList);
 			return s;
 		}
 
@@ -158,6 +164,7 @@ public class TopicFragment extends Fragment {
     	topicList.clear();
     	mAdapter.notifyDataSetChanged();
     	progressBar.setVisibility(View.VISIBLE);
+    	recentPageNum = 0;
     	new GetDataTask().execute();
     }
     
