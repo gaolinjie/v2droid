@@ -7,7 +7,7 @@ import android.os.Handler;
 
 public class Splash extends Activity {
 	
-	public static final String SHOW_TOPIC = "com.v2ex.v2droid.action.SHOW_TOPIC";
+	public static final String SHOW_MAIN = "com.v2ex.v2droid.action.SHOW_MAIN";
 
 	private final int SPLASH_DISPLAY_LENGHT = 1000;
 
@@ -21,7 +21,7 @@ public class Splash extends Activity {
 
 			@Override
 			public void run() {
-				Intent mainIntent = new Intent(Splash.this, TopicActivity.class);
+				Intent mainIntent = new Intent(Splash.this, MainActivity.class);
 				Splash.this.startActivity(mainIntent);
 				Splash.this.finish();
 			}

@@ -1,15 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">v2droid</string>
+    <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-    <string name="menu_settings">Settings</string>
-    <string name="title_activity_topic">主题</string>
-    <string name="title_activity_content">内容</string>
-    <string name="title_activity_login">登入</string>
+    <string name="dark">Dark</string>
+    <string name="light">Light</string>
+    <string name="mixed">Mixed</string>
+    <string name="select_browser">Select a browser</string>
+    <string name="github">GitHub</string>
+    <string name="write_to_developers">Write to developers</string>
+    <string name="about">关于</string>
+    <string name="newtopic">新建</string>
+    <string name="refresh">刷新</string>
+    <string name="topic">主题</string>
+    <string name="content">内容</string>
     <string name="favourite_on">收藏成功</string>
     <string name="favourite_off">取消收藏</string>
-    <string name="login_label">登入</string>
+    <string name="login">登入</string>
     <string name="username_text">用户名</string>
     <string name="password_text">密码</string>
+    <string name="more">More...</string>
+    <string name="reply_hint">输入回复</string>
+    <string name="reply">回复</string>
+    <string name="user">\@gaolinjie</string>
+    <string name="favorite">收藏夹</string>
+    <string name="setting">设置</string>
 
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<attr name="NavigationItemStyle" />
+	<declare-styleable name="WidgetContainer">
+		<attr name="android:text" />
+		<attr name="android:layout" />
+		<attr name="titleLayout" format="reference" />
+	</declare-styleable>
+	<declare-styleable name="NavigationItem">
+		<attr name="android:text" />
+		<attr name="android:color" />
+		<attr name="android:background" />
+	</declare-styleable>
+</resources>

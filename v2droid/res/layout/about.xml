@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:holo="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent" >
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:divider="?android:listDivider"
+		android:orientation="vertical" >
+		<NavigationItem
+			android:id="@+id/github"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="@string/github"
+			android:color="@color/holo_blue_light" />
+		<NavigationItem
+			android:id="@+id/developers"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="@string/write_to_developers"
+			android:color="@color/holo_green_light" />
+	</LinearLayout>
+</LinearLayout>

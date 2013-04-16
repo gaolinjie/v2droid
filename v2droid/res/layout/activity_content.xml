@@ -1,9 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/activity_content"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ScrollView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical" >
 
+    <LinearLayout
+        android:id="@+id/fragment_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+        
+        <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminateOnly="true" />
 
-    
-</LinearLayout>
+        <RelativeLayout
+            android:id="@+id/content_wraper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_rect"
+            android:layout_marginTop="10dip"
+            android:layout_marginBottom="10dip" >
+
+            <!-- ListRow Left sied avatar image -->
+
+            <LinearLayout
+                android:id="@+id/avatar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_margin="10dip"
+                android:background="@drawable/image_bg" >
+
+                <ImageView
+                    android:id="@+id/user_image"
+                    android:layout_width="50dip"
+                    android:layout_height="50dip"
+                    android:src="@drawable/default_user" />
+            </LinearLayout>
+
+            <!-- Title Of Topic -->
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="5dip"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:layout_marginTop="10dip"
+                android:layout_toRightOf="@id/avatar"
+                android:textColor="#040404"
+                android:textSize="20dip"
+                android:textStyle="bold"
+                android:typeface="sans" />
+
+            <LinearLayout
+                android:id="@+id/info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/title"
+                android:layout_marginBottom="5dip"
+                android:layout_marginRight="5dip" >
+
+                <TextView
+                    android:id="@+id/info_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="By darcy at 222 天前, 1433 次点击  "
+                    android:textColor="#343434"
+                    android:textSize="10dip" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/dotted_line"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/info"
+                android:src="@drawable/dotted" />
+
+            <WebView
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/dotted_line"
+                android:layout_margin="10dip"
+                android:paddingBottom="10dip" />
+
+            <RelativeLayout
+                android:id="@+id/content_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/content"
+                android:background="@drawable/rounded_rect_gray"
+                android:orientation="horizontal"
+                android:padding="10dip" >
+
+                <TextView
+                    android:id="@+id/bottom_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:text="已有 24 人收藏此主题"
+                    android:textColor="#aeaeaeae"
+                    android:textSize="15dip" />
+
+                <ImageView
+                    android:id="@+id/fav_icon"
+                    android:layout_width="20dip"
+                    android:layout_height="20dip"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/favourite"
+                    android:tag="@string/favourite_off" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/replies_wraper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dip"
+            android:background="@drawable/rounded_rect"
+            android:orientation="vertical" >
+
+            <WebView
+                android:id="@+id/replies_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dip"
+                android:focusableInTouchMode="true"
+                android:focusable="true"/>
+
+            <TextView
+                android:id="@+id/noreply_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="目前尚无回复"
+                android:textColor="#aeaeaeae"
+                android:textSize="15dip"
+                android:padding="10dip" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

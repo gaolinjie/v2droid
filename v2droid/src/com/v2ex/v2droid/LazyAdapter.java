@@ -3,14 +3,18 @@ package com.v2ex.v2droid;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import android.app.Activity;
+import org.holoeverywhere.LayoutInflater;
+import org.holoeverywhere.app.Activity;
+import org.holoeverywhere.widget.LinearLayout;
+import org.holoeverywhere.widget.TextView;
+
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.TextView;
+
+
 
 public class LazyAdapter extends BaseAdapter {
     
@@ -48,16 +52,37 @@ public class LazyAdapter extends BaseAdapter {
         TextView replies = (TextView)vi.findViewById(R.id.replies); // replies
         TextView node = (TextView)vi.findViewById(R.id.node); // node
         ImageView thumb_image=(ImageView)vi.findViewById(R.id.list_image); // thumb image
+        TextView more = (TextView)vi.findViewById(R.id.more); // more
+        LinearLayout avatar_layout = (LinearLayout)vi.findViewById(R.id.avatar);
         
         HashMap<String, String> topic = new HashMap<String, String>();
         topic = data.get(position);
         
-        // Setting all values in listview
-        title.setText(topic.get(TopicFragment.KEY_TITLE));
-        username.setText(topic.get(TopicFragment.KEY_USERNAME));
-        replies.setText(topic.get(TopicFragment.KEY_REPLIES));
-        node.setText(topic.get(TopicFragment.KEY_NODE));
-        imageLoader.DisplayImage(topic.get(TopicFragment.KEY_AVATAR), thumb_image);
+        if (topic.get(TopicFragment.KEY_TITLE) != MainActivity.MORE_TAG) {
+        	// Setting all values in listview
+            title.setText(topic.get(TopicFragment.KEY_TITLE));
+            username.setText(topic.get(TopicFragment.KEY_USERNAME));
+            replies.setText(topic.get(TopicFragment.KEY_REPLIES));
+            node.setText(topic.get(TopicFragment.KEY_NODE));
+            imageLoader.DisplayImage(topic.get(TopicFragment.KEY_AVATAR), thumb_image);
+            title.setVisibility(View.VISIBLE);
+            username.setVisibility(View.VISIBLE);
+            replies.setVisibility(View.VISIBLE);
+            node.setVisibility(View.VISIBLE);
+            thumb_image.setVisibility(View.VISIBLE);
+            avatar_layout.setVisibility(View.VISIBLE);
+            more.setVisibility(View.GONE);
+        } else {
+        	title.setVisibility(View.GONE);
+            username.setVisibility(View.GONE);
+            replies.setVisibility(View.GONE);
+            node.setVisibility(View.GONE);
+            thumb_image.setVisibility(View.GONE);
+            avatar_layout.setVisibility(View.GONE);
+            more.setText(activity.getResources().getString(R.string.more));
+            more.setVisibility(View.VISIBLE);
+        }
+        
         return vi;
     }
 }

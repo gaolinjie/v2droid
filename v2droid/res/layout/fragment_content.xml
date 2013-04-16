@@ -3,7 +3,6 @@
     android:id="@+id/ScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#bcbdbf"
     android:scrollbars="vertical" >
 
     <LinearLayout
@@ -11,13 +10,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
+        
+        <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminateOnly="true" />
 
         <RelativeLayout
             android:id="@+id/content_wraper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dip"
-            android:background="@drawable/rounded_rect" >
+            android:background="@drawable/rounded_rect"
+            android:layout_marginTop="10dip"
+            android:layout_marginBottom="10dip" >
 
             <!-- ListRow Left sied avatar image -->
 
@@ -119,10 +126,9 @@
             android:id="@+id/replies_wraper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dip"
-            android:layout_marginRight="10dip"
             android:layout_marginBottom="10dip"
-            android:background="@drawable/rounded_rect" >
+            android:background="@drawable/rounded_rect"
+            android:orientation="vertical" >
 
             <WebView
                 android:id="@+id/replies_list"

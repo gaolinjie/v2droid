@@ -1,8 +1,13 @@
+
 package com.v2ex.v2droid;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.holoeverywhere.LayoutInflater;
+import org.holoeverywhere.app.Fragment;
+import org.holoeverywhere.widget.ProgressBar;
+import org.holoeverywhere.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,22 +15,22 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebView;
 import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import de.neofonie.mobile.app.android.widget.crouton.Crouton;
 import de.neofonie.mobile.app.android.widget.crouton.Style;
 
-public class ContentFragment extends SherlockFragment {
+public class ContentFragment extends Fragment {
 
 	private final static String TAG = "ContentFragment";
 
@@ -61,6 +66,8 @@ public class ContentFragment extends SherlockFragment {
 	static final String KEY_CONTENT = "content_rendered";
 	static final String KEY_USERNAME = "username";
 	static final String KEY_AVATAR = "avatar";
+	
+	private ProgressBar progressBar;
 
 	public static ContentFragment newInstance(String text) {
 		ContentFragment fragment = new ContentFragment();
@@ -74,8 +81,8 @@ public class ContentFragment extends SherlockFragment {
 		View view = null;
 		view = inflater.inflate(R.layout.fragment_content, container, false);
 
-		Intent intent = getActivity().getIntent();
-		String topicID = intent.getStringExtra("EXTRA_TOPIC_ID");
+		//Intent intent = getActivity().getIntent();
+		String topicID = MainActivity.TOPIC_ID;
 
 		mRepliesListView = (WebView) view.findViewById(R.id.replies_list);
 		mRepliesListView.setVisibility(View.GONE);
@@ -85,6 +92,10 @@ public class ContentFragment extends SherlockFragment {
 		contentView.setVisibility(View.GONE);
 		TextView noreplyView = (TextView) view.findViewById(R.id.noreply_text);
 		noreplyView.setVisibility(View.GONE);
+		
+		progressBar = (ProgressBar) view
+				.findViewById(R.id.progress_bar);
+		progressBar.setVisibility(View.VISIBLE);
 
 		// Setup the favorite icon
 		mFavImageView = (ImageView) view.findViewById(R.id.fav_icon);
@@ -119,18 +130,27 @@ public class ContentFragment extends SherlockFragment {
 		super.onCreate(savedInstanceState);
 		mContext = getActivity();
 		mImageLoader = new ImageLoader(getActivity().getApplicationContext());
+		((MainActivity) getSupportActivity()).getSupportActionBar().setTitle(R.string.content);
+		setHasOptionsMenu(true);
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 	}
+	
+	@Override
+    public void onResume() {
+    	super.onResume();
+    	((MainActivity) getSupportActivity()).getSupportActionBar().setTitle(R.string.content);	
+    }
 
 	public void setupTopicContentUI(String topicID, final View view) {
 		V2HttpClient.get(URL_SUFFIX_TOPIC + topicID, null,
 				new JsonHttpResponseHandler() {
 					@Override
 					public void onSuccess(JSONArray topics) {
+						progressBar.setVisibility(View.GONE);
 						try {
 							JSONObject topic = topics.getJSONObject(0);
 
@@ -191,6 +211,8 @@ public class ContentFragment extends SherlockFragment {
 											.notifyDataSetChanged();
 								}
 							}
+							
+							
 
 						} catch (JSONException e) {
 							e.printStackTrace();
@@ -276,6 +298,7 @@ public class ContentFragment extends SherlockFragment {
 							} else {
 								mFlagRepliesDataDone = true;
 							}
+							
 
 						} catch (JSONException e) {
 							e.printStackTrace();
@@ -285,5 +308,45 @@ public class ContentFragment extends SherlockFragment {
 					}
 				});
 	}
+	
+	private static ContentFragment instance;
+
+    public static ContentFragment getInstance() {
+        if (ContentFragment.instance == null) {
+            return new ContentFragment();
+        }
+        return ContentFragment.instance;
+    }
+
+    public ContentFragment() {
+    	ContentFragment.instance = this;
+    }
+    
+    @Override
+    public void onCreateOptionsMenu(
+          Menu menu, MenuInflater inflater) {
+       inflater.inflate(R.menu.fragment_content, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        	case android.R.id.home:
+        		((MainActivity)getActivity()).toggle();
+        		break;
+        		
+        	case R.id.reply:
+        		((MainActivity) getSupportActivity()).replaceFragment(ReplyFragment.getInstance(),
+        				((MainActivity) getSupportActivity()).getResources().getString(R.string.reply));
+                break;
+                
+            case R.id.refresh:
+                break;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
 
 }

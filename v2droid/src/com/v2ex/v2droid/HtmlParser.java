@@ -18,6 +18,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+
 public class HtmlParser {
 	
 	static final String KEY_ID = "id";
@@ -63,12 +64,17 @@ public class HtmlParser {
 
 	public static ArrayList<HashMap<String, String>> getTopics(String url,
 			ArrayList<HashMap<String, String>> topics) {
-		//try {
-			String html = getHtmlByUrl(url);
-			Document doc = Jsoup.parse(html);
-			//Document doc = Jsoup.connect(url).get();
+		try {
+			//String html = getHtmlByUrl(url);
+			//Document doc = Jsoup.parse(html);
+			Document doc = Jsoup.connect(url).get();
 			Elements items = doc.select("div[class=cell item]");
 
+			if (!items.isEmpty() && !topics.isEmpty()) {
+				topics.remove(topics.size()-1);
+			}
+			
+			
 			for (Element item : items) {
 				Element titleElement = item.select("span[class=item_title]>a")
 						.get(0);
@@ -101,9 +107,22 @@ public class HtmlParser {
 				// adding HashList to ArrayList
 				topics.add(map);
 			}
-		//} catch (IOException e) {
-		//	e.printStackTrace();
-		//}
+		} catch (IOException e) {
+			System.out.println("访问[" + url + "]出现异常!");
+			e.printStackTrace();
+		}
+		
+		HashMap<String, String> mapMore = new HashMap<String, String>();
+		
+		mapMore.put(KEY_ID, MainActivity.MORE_TAG);
+		mapMore.put(KEY_TITLE, MainActivity.MORE_TAG);
+		mapMore.put(KEY_USERNAME, MainActivity.MORE_TAG);
+		mapMore.put(KEY_REPLIES, MainActivity.MORE_TAG);
+		mapMore.put(KEY_AVATAR, MainActivity.MORE_TAG);
+		mapMore.put(KEY_NODE, MainActivity.MORE_TAG);
+
+		// adding HashList to ArrayList
+		topics.add(mapMore);
 
 		return topics;
 	}
