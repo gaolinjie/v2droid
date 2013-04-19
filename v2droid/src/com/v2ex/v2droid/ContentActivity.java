@@ -32,6 +32,8 @@ import de.neofonie.mobile.app.android.widget.crouton.Style;
 public class ContentActivity extends Activity {
 	
 	private final static String TAG = "ContentFragment";
+	
+	public static final String SHOW_REPLY = "com.v2ex.v2droid.action.SHOW_REPLY";
 
 	Context mContext;
 	private WebView mRepliesListView = null;
@@ -67,6 +69,8 @@ public class ContentActivity extends Activity {
 	static final String KEY_AVATAR = "avatar";
 	
 	private ProgressBar progressBar;
+	
+	String topicID;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +85,7 @@ public class ContentActivity extends Activity {
         mImageLoader = new ImageLoader(getApplicationContext());
         
 		Intent intent = getIntent();
-		String topicID = intent.getStringExtra("EXTRA_TOPIC_ID");
+		topicID = intent.getStringExtra("EXTRA_TOPIC_ID");
 		System.out.println("访问[@@@@@" + topicID);
 
 		mRepliesListView = (WebView) findViewById(R.id.replies_list);
@@ -138,6 +142,9 @@ public class ContentActivity extends Activity {
         		break;
         		
         	case R.id.reply:
+				Intent intent = new Intent(SHOW_REPLY);
+				intent.putExtra("EXTRA_TOPIC_ID", topicID);
+				startActivity(intent);
                 break;
                 
             case R.id.refresh:

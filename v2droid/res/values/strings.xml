@@ -26,5 +26,22 @@
     <string name="user">\@gaolinjie</string>
     <string name="favorite">收藏夹</string>
     <string name="setting">设置</string>
+    <string name="msg_login_usr_null">请输入用户名</string>
+    <string name="msg_login_pwd_null">请输入密码</string>
+    <string name="msg_login_fail">登入失败，请重试</string>
+    <string name="http_status_code_error">http_status_code_error</string>
+    <string name="http_exception_error">http_exception_error</string>
+    <string name="socket_exception_error">socket_exception_error</string>
+    <string name="network_not_connected">network_not_connected</string>
+    <string name="xml_parser_failed">xml_parser_failed</string>
+    <string name="io_exception_error">io_exception_error</string>
+    <string name="app_run_code_error">app_run_code_error</string>
+    <string name="send">发送</string>
+    <string name="node_hint">输入节点</string>
+    <string name="title_hint">输入标题</string>
+    <string name="content_hint">输入内容</string>
+    <string name="node">节点</string>
+    <string name="title">主题</string>
+    <string name="content">内容</string>
 
 </resources>

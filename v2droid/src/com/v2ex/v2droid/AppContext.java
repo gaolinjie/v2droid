@@ -1,12 +1,15 @@
 
 package com.v2ex.v2droid;
 
-import java.io.InputStream;
+import java.util.UUID;
 
 import org.holoeverywhere.LayoutInflater;
 import org.holoeverywhere.ThemeManager;
 import org.holoeverywhere.app.Application;
 import org.holoeverywhere.app.Application.Config.PreferenceImpl;
+
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 
 public class AppContext extends Application {
     static {
@@ -41,7 +44,7 @@ public class AppContext extends Application {
 	 * @return
 	 * @throws AppException
 	 */
-	public InputStream loginVerify(String account, String pwd) throws AppException {
+	public String loginVerify(String account, String pwd) throws AppException {
 		return ApiClient.login(this, account, pwd);
 	}
 	
@@ -51,6 +54,34 @@ public class AppContext extends Application {
 	
 	public String getProperty(String key){
 		return AppConfig.getAppConfig(this).get(key);
+	}
+	
+	/**
+	 * 获取App安装包信息
+	 * @return
+	 */
+	public PackageInfo getPackageInfo() {
+		PackageInfo info = null;
+		try { 
+			info = getPackageManager().getPackageInfo(getPackageName(), 0);
+		} catch (NameNotFoundException e) {    
+			e.printStackTrace(System.err);
+		} 
+		if(info == null) info = new PackageInfo();
+		return info;
+	}
+	
+	/**
+	 * 获取App唯一标识
+	 * @return
+	 */
+	public String getAppId() {
+		String uniqueID = getProperty(AppConfig.CONF_APP_UNIQUEID);
+		if(StringUtils.isEmpty(uniqueID)){
+			uniqueID = UUID.randomUUID().toString();
+			setProperty(AppConfig.CONF_APP_UNIQUEID, uniqueID);
+		}
+		return uniqueID;
 	}
 
 }

@@ -27,6 +27,7 @@ public class TopicFragment extends Fragment {
 	private final static String TAG = "TopicFragment";
 
 	public static final String SHOW_CONTENT = "com.v2ex.v2droid.action.SHOW_CONTENT";
+	public static final String SHOW_NEW= "com.v2ex.v2droid.action.SHOW_NEW";
 	
     static final String KEY_ID = "id";
 	static final String KEY_TITLE = "title";
@@ -180,6 +181,11 @@ public class TopicFragment extends Fragment {
         	case android.R.id.home:
         		((MainActivity)getActivity()).toggle();
         		break;
+        		
+        	case R.id.newtopic:
+        		Intent intent = new Intent(SHOW_NEW);
+				getActivity().startActivity(intent);
+                break;
                 
             case R.id.refresh:
             	onRefresh();

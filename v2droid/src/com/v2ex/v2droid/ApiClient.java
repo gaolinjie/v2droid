@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
@@ -21,6 +22,7 @@ import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+
 
 
 /**
@@ -37,12 +39,26 @@ public class ApiClient {
 	
 	private final static int TIMEOUT_CONNECTION = 20000;
 	private final static int TIMEOUT_SOCKET = 20000;
-	private final static int RETRY_TIME = 3;
+	private final static int RETRY_TIME = 1;
 
 	private static String appCookie;
+	private static String appUserAgent;
 
 	public static void cleanCookie() {
 		appCookie = "";
+	}
+	
+	private static String getUserAgent(AppContext appContext) {
+		if(appUserAgent == null || appUserAgent == "") {
+			StringBuilder ua = new StringBuilder("OSChina.NET");
+			ua.append('/'+appContext.getPackageInfo().versionName+'_'+appContext.getPackageInfo().versionCode);//App版本
+			ua.append("/Android");//手机系统平台
+			ua.append("/"+android.os.Build.VERSION.RELEASE);//手机系统版本
+			ua.append("/"+android.os.Build.MODEL); //手机型号
+			ua.append("/"+appContext.getAppId());//客户端唯一标识
+			appUserAgent = ua.toString();
+		}
+		return appUserAgent;
 	}
 	
 	private static String getCookie(AppContext appContext) {
@@ -68,23 +84,25 @@ public class ApiClient {
 		return httpClient;
 	}	
 	
-	private static GetMethod getHttpGet(String url, String cookie) {
+	private static GetMethod getHttpGet(String url, String cookie, String userAgent) {
 		GetMethod httpGet = new GetMethod(url);
 		// 设置 请求超时时间
 		httpGet.getParams().setSoTimeout(TIMEOUT_SOCKET);
 		httpGet.setRequestHeader("Host", URLs.HOST);
 		httpGet.setRequestHeader("Connection","Keep-Alive");
 		httpGet.setRequestHeader("Cookie", cookie);
+		httpGet.setRequestHeader("User-Agent", userAgent);
 		return httpGet;
 	}
 	
-	private static PostMethod getHttpPost(String url, String cookie) {
+	private static PostMethod getHttpPost(String url, String cookie, String userAgent) {
 		PostMethod httpPost = new PostMethod(url);
 		// 设置 请求超时时间
 		httpPost.getParams().setSoTimeout(TIMEOUT_SOCKET);
 		httpPost.setRequestHeader("Host", URLs.HOST);
 		httpPost.setRequestHeader("Connection","Keep-Alive");
 		httpPost.setRequestHeader("Cookie", cookie);
+		httpPost.setRequestHeader("User-Agent", userAgent);
 		return httpPost;
 	}
 	
@@ -96,6 +114,7 @@ public class ApiClient {
 	private static InputStream http_get(AppContext appContext, String url) throws AppException {	
 		//System.out.println("get_url==> "+url);
 		String cookie = getCookie(appContext);
+		String userAgent = getUserAgent(appContext);
 		
 		HttpClient httpClient = null;
 		GetMethod httpGet = null;
@@ -106,7 +125,7 @@ public class ApiClient {
 			try 
 			{
 				httpClient = getHttpClient();
-				httpGet = getHttpGet(url, cookie);			
+				httpGet = getHttpGet(url, cookie, userAgent);			
 				int statusCode = httpClient.executeMethod(httpGet);
 				if (statusCode != HttpStatus.SC_OK) {
 					throw AppException.http(statusCode);
@@ -155,9 +174,10 @@ public class ApiClient {
 	 * @param files
 	 * @throws AppException
 	 */
-	private static InputStream _post(AppContext appContext, String url, Map<String, Object> params, Map<String,File> files) throws AppException {
-		//System.out.println("post_url==> "+url);
+	private static String _post(AppContext appContext, String url, Map<String, Object> params, Map<String,File> files) throws AppException {
+		System.out.println("post_url==> "+url);
 		String cookie = getCookie(appContext);
+		String userAgent = getUserAgent(appContext);
 		
 		HttpClient httpClient = null;
 		PostMethod httpPost = null;
@@ -169,7 +189,7 @@ public class ApiClient {
         if(params != null)
         for(String name : params.keySet()){
         	parts[i++] = new StringPart(name, String.valueOf(params.get(name)), UTF_8);
-        	//System.out.println("post_key==> "+name+"    value==>"+String.valueOf(params.get(name)));
+        	System.out.println("post_key==> "+name+"    value==>"+String.valueOf(params.get(name)));
         }
         if(files != null)
         for(String file : files.keySet()){
@@ -178,7 +198,7 @@ public class ApiClient {
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-        	//System.out.println("post_key_file==> "+file);
+        	System.out.println("post_key_file==> "+file);
         }
 		
 		String responseBody = "";
@@ -186,16 +206,16 @@ public class ApiClient {
 		do{
 			try 
 			{
+				System.out.println("getHttpClient==> ");
 				httpClient = getHttpClient();
-				httpPost = getHttpPost(url, cookie);	        
+				httpPost = getHttpPost(url, cookie, userAgent);	        
 		        httpPost.setRequestEntity(new MultipartRequestEntity(parts,httpPost.getParams()));		        
 		        int statusCode = httpClient.executeMethod(httpPost);
-		        if(statusCode != HttpStatus.SC_OK) 
+		        System.out.println("statusCode==> "+statusCode);	        
+		        
+		        if(statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_MOVED_TEMPORARILY ) 
 		        {
-		        	throw AppException.http(statusCode);
-		        }
-		        else if(statusCode == HttpStatus.SC_OK) 
-		        {
+		        	System.out.println("cookies=====>");
 		            Cookie[] cookies = httpClient.getState().getCookies();
 		            String tmpcookies = "";
 		            for (Cookie ck : cookies) {
@@ -206,9 +226,20 @@ public class ApiClient {
 	        			appContext.setProperty("cookie", tmpcookies);
 	        			appCookie = tmpcookies;
 	        		}
+	        		
+	        		if (HttpStatus.SC_MOVED_TEMPORARILY == statusCode) {
+						Header[]  headers = httpPost.getResponseHeaders("Location");
+						if ((null != headers) && (0 != headers.length)) {
+							String urlAddress = headers[headers.length - 1].getValue();
+							System.out.println("Location==> "+urlAddress);
+							//return urlAddress;
+						}
+					}
+		        } else {
+		        	throw AppException.http(statusCode);
 		        }
 		     	responseBody = httpPost.getResponseBodyAsString();
-		        //System.out.println("XMLDATA=====>"+responseBody);
+		        System.out.println("XMLDATA=====>"+responseBody);
 		     	break;	     	
 			} catch (HttpException e) {
 				time++;
@@ -240,8 +271,10 @@ public class ApiClient {
 		}while(time < RETRY_TIME);
         
         responseBody = responseBody.replaceAll("\\p{Cntrl}", "");
+        
+        InputStream is = new ByteArrayInputStream(responseBody.getBytes());
 
-        return new ByteArrayInputStream(responseBody.getBytes());
+        return is.toString();
 	}
 	
 	/**
@@ -253,7 +286,7 @@ public class ApiClient {
 	 * @throws IOException 
 	 * @throws  
 	 */
-	private static InputStream http_post(AppContext appContext, String url, Map<String, Object> params, Map<String,File> files) throws AppException, IOException {
+	private static String http_post(AppContext appContext, String url, Map<String, Object> params, Map<String,File> files) throws AppException, IOException {
         return _post(appContext, url, params, files);  
 	}
 	
@@ -265,11 +298,10 @@ public class ApiClient {
 	 * @return
 	 * @throws AppException
 	 */
-	public static InputStream login(AppContext appContext, String username, String pwd) throws AppException {
+	public static String login(AppContext appContext, String username, String pwd) throws AppException {
 		Map<String,Object> params = new HashMap<String,Object>();
-		params.put("username", username);
-		params.put("pwd", pwd);
-		params.put("keep_login", 1);
+		params.put("u", username);
+		params.put("p", pwd);
 				
 		String loginurl = URLs.LOGIN_VALIDATE_HTTP;
 		

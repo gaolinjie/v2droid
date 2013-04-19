@@ -56,7 +56,7 @@ public class AppException extends Exception {
 	 * 提示友好的错误信息
 	 * @param ctx
 	 */
-	public void makeToast(Context ctx){/*
+	public void makeToast(Context ctx){
 		switch(this.getType()){
 		case TYPE_HTTP_CODE:
 			String err = ctx.getString(R.string.http_status_code_error, this.getCode());
@@ -80,7 +80,7 @@ public class AppException extends Exception {
 		case TYPE_RUN:
 			Toast.makeText(ctx, R.string.app_run_code_error, Toast.LENGTH_SHORT).show();
 			break;
-		}*/
+		}
 	}
 	
 	/**

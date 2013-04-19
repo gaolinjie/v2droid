@@ -51,6 +51,26 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ReplyActivity"
+            android:label="@string/reply"
+            android:windowSoftInputMode="stateVisible" >
+            <intent-filter>
+                <action android:name="com.v2ex.v2droid.action.SHOW_REPLY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".NewActivity"
+            android:label="@string/newtopic"
+            android:windowSoftInputMode="stateVisible" >
+            <intent-filter>
+                <action android:name="com.v2ex.v2droid.action.SHOW_NEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 	</application>
 	<uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

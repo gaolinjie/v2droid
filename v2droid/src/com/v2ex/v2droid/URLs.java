@@ -22,7 +22,7 @@ public class URLs implements Serializable {
 	private final static String URL_UNDERLINE = "_";
 	
 	private final static String URL_API_HOST = HTTP + HOST + URL_SPLITTER;
-	public final static String LOGIN_VALIDATE_HTTP = HTTP + HOST + URL_SPLITTER + "action/api/login_validate";
+	public final static String LOGIN_VALIDATE_HTTP = "http://www.v2ex.com/signin";
 	public final static String LOGIN_VALIDATE_HTTPS = HTTPS + HOST + URL_SPLITTER + "action/api/login_validate";
 	public final static String NEWS_LIST = URL_API_HOST+"action/api/news_list";
 	public final static String NEWS_DETAIL = URL_API_HOST+"action/api/news_detail";

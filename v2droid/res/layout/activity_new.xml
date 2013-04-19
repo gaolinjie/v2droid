@@ -1,0 +1,95 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="5dp"
+    android:orientation="vertical" >
+    
+    <TextView
+        android:id="@+id/node_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/node"
+        android:textSize="17dp"
+        android:textColor="@color/holo_blue_light"
+        android:layout_marginTop="13dp" />
+    
+    <TextView
+        android:id="@+id/node_divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/holo_blue_light"
+        android:layout_marginTop="3dp" />
+
+    <EditText
+        android:id="@+id/node_edit"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/node_hint"
+        android:gravity="top"
+        android:inputType="text"
+        android:textColor="#ffffff"
+        android:textCursorDrawable="@null"
+        android:layout_marginTop="5dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+    
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/title"
+        android:textSize="17dp"
+        android:textColor="@color/holo_blue_light"
+        android:layout_marginTop="13dp" />
+    
+    <TextView
+        android:id="@+id/title_divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/holo_blue_light"
+        android:layout_marginTop="3dp" />
+    
+    <EditText
+        android:id="@+id/title_edit"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/title_hint"
+        android:gravity="top"
+        android:inputType="textMultiLine"
+        android:textColor="#ffffff"
+        android:textCursorDrawable="@null"
+        android:layout_marginTop="5dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+    
+    <TextView
+        android:id="@+id/content_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/content"
+        android:textSize="17dp"
+        android:textColor="@color/holo_blue_light"
+        android:layout_marginTop="13dp" />
+    
+    <TextView
+        android:id="@+id/content_divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/holo_blue_light"
+        android:layout_marginTop="3dp" />
+    
+    <EditText
+        android:id="@+id/content_edit"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/content_hint"
+        android:gravity="top"
+        android:inputType="textMultiLine"
+        android:textColor="#ffffff"
+        android:textCursorDrawable="@null"
+        android:layout_marginTop="15dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+
+</LinearLayout>
