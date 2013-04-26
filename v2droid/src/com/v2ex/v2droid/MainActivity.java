@@ -10,14 +10,17 @@ import org.holoeverywhere.slidingmenu.SlidingActivity;
 import org.holoeverywhere.slidingmenu.SlidingMenu;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.readystatesoftware.viewbadger.BadgeView;
 
 public class MainActivity extends SlidingActivity {
 	public static String TOPIC_ID = null;
@@ -29,6 +32,7 @@ public class MainActivity extends SlidingActivity {
 			ArrayAdapter<MainNavigationItem> implements OnItemClickListener {
 		private int lastSelectedItem = 0;
 		private int preSelectedItem = -1;
+		private View messageView = null;
 
 		public ListNavigationAdapter() {
 			this(new ArrayList<MainNavigationItem>());
@@ -55,6 +59,12 @@ public class MainActivity extends SlidingActivity {
 			view.setLabel(item.title);
 			view.setSelectionHandlerVisiblity(lastSelectedItem == position ? View.VISIBLE
 					: View.INVISIBLE);
+			
+			if (item.title == R.string.message) {
+				messageView = view.findViewById(R.id.selectionHandler2);
+				setMessageIndicator(15);
+			}
+						
 			return view;
 		}
 
@@ -86,6 +96,17 @@ public class MainActivity extends SlidingActivity {
 		public void onBackPressed() {
 			lastSelectedItem = preSelectedItem;
 			notifyDataSetInvalidated();
+		}
+		
+		public void setMessageIndicator(int messageNum) {
+			if (messageNum == 0 || messageView==null) {
+				return;
+			}
+			BadgeView badge = new BadgeView(MainActivity.this, messageView);
+			badge.setText(Integer.toString(messageNum));
+	    	badge.setBadgeBackgroundColor(Color.parseColor("#A4C639"));
+	    	badge.setBadgePosition(BadgeView.POSITION_CENTER);
+			badge.show();
 		}
 
 	}

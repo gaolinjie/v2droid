@@ -31,6 +31,8 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 	private static final String KEY_LIST_POSITION = "key_list_position";
 	private static final String NODE_PREFS = "NodePrefsFile";
 	private static final String HOT_NODES = "hot_nodes";
+	
+	public static final String SHOW_NODE = "com.v2ex.v2droid.action.SHOW_NODE";
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -54,7 +56,7 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 	static final String KEY_HEADER_ID = "header_id";
 	static final String KEY_HEADER = "header";
 	static final String KEY_NAME = "name";
-	static final String KEY_LINK = "LINK";
+	static final String KEY_LINK = "link";
 
 	private SharedPreferences nodePrefs;
 	String storedCollection = null;
@@ -94,6 +96,11 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 		// Notify the active callbacks interface (the activity, if the
 		// fragment is attached to one) that an item has been selected.
 		// mCallbacks.onItemSelected(position);
+		System.out.println("onCreateView===> " + nodeList.get(position).get(KEY_LINK));
+		Intent intent = new Intent(SHOW_NODE);
+		intent.putExtra("EXTRA_NODE_NAME", nodeList.get(position).get(KEY_NAME));
+		intent.putExtra("EXTRA_NODE_LINK", nodeList.get(position).get(KEY_LINK));
+		getActivity().startActivity(intent);
 	}
 
 	@Override

@@ -79,6 +79,7 @@ public class HtmlParser {
 			}
 
 			for (Element item : items) {
+				//System.out.println("item======>" + item.toString());
 				Element titleElement = item.select("span[class=item_title]>a")
 						.get(0);
 				String href = titleElement.attr("href");
@@ -175,6 +176,75 @@ public class HtmlParser {
 		}
 
 		return nodes;
+	}
+	
+	public static ArrayList<HashMap<String, String>> getNodeTopics(String url, String nodeName,
+			ArrayList<HashMap<String, String>> topics) {
+		//try {
+			 String html = getHtmlByUrl(url);
+			 System.out.println("getHtmlByUrl======>" + html);
+			 Document doc = Jsoup.parse(html);
+			//Document doc = Jsoup.connect(url).get();
+			Elements items = doc.select("div#TopicsNode").select("table");
+			System.out.println("item======>" + items.toString());
+			if (!items.isEmpty() && !topics.isEmpty()) {
+				topics.remove(topics.size() - 1);
+			}
+
+			for (Element item : items) {
+				System.out.println("item======>" + item.toString());
+				Element titleElement = item.select("span[class=item_title]>a")
+						.get(0);
+				String href = titleElement.attr("href");
+				System.out.println("href======>" + href);
+				String id = getMatcher("/t/([\\d]+)", href);
+				System.out.println("id======>" + id);
+				String replies = getMatcher("#reply([\\d]+)", href);
+				System.out.println("replies======>" + replies);
+				String title = titleElement.text();
+				System.out.println("title======>" + title);
+				Element usernameElement = item.select("td>a").get(0);
+				String href2 = usernameElement.attr("href");
+				System.out.println("href2======>" + href2);
+				String username = getMatcher("/member/([0-9a-zA-Z]+)", href2);
+				System.out.println("username======>" + username);
+				Element avatarElement = usernameElement.select("img").get(0);
+				String avatar = avatarElement.attr("src");
+				System.out.println("avatar======>" + avatar);
+
+				// creating new HashMap
+				HashMap<String, String> map = new HashMap<String, String>();
+
+				// adding each child node to HashMap key =>
+				// value
+				map.put(KEY_ID, id);
+				map.put(KEY_TITLE, title);
+				map.put(KEY_USERNAME, username);
+				map.put(KEY_REPLIES, replies);
+				map.put(KEY_AVATAR, avatar);
+				map.put(KEY_NODE, nodeName);
+
+				// adding HashList to ArrayList
+				topics.add(map);
+			}
+		//} catch (IOException e) {
+		//	System.out.println("访问[" + url + "]出现异常!");
+		//	e.printStackTrace();
+		//}
+
+		HashMap<String, String> mapMore = new HashMap<String, String>();
+
+		mapMore.put(KEY_ID, MainActivity.MORE_TAG);
+		mapMore.put(KEY_TITLE, MainActivity.MORE_TAG);
+		mapMore.put(KEY_USERNAME, MainActivity.MORE_TAG);
+		mapMore.put(KEY_REPLIES, MainActivity.MORE_TAG);
+		mapMore.put(KEY_AVATAR, MainActivity.MORE_TAG);
+		mapMore.put(KEY_NODE, MainActivity.MORE_TAG);
+
+		// adding HashList to ArrayList
+		topics.add(mapMore);
+
+		return topics;
 	}
 
 	public static String getMatcher(String regex, String source) {
