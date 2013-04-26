@@ -40,8 +40,9 @@
     <string name="node_hint">输入节点</string>
     <string name="title_hint">输入标题</string>
     <string name="content_hint">输入内容</string>
-    <string name="node">节点</string>
+    <string name="node">热门节点</string>
     <string name="title">主题</string>
     <string name="content">内容</string>
+    <string name="message">消息</string>
 
 </resources>

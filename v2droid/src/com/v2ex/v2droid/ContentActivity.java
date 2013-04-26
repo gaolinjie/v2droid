@@ -281,7 +281,7 @@ public class ContentActivity extends Activity {
 							sb.append("</table>");
 							sb.append("</body></html>");
 
-							System.out.println(sb.toString());
+							//System.out.println(sb.toString());
 
 							mRepliesListView.loadDataWithBaseURL(null,
 									sb.toString(), "text/html", "UTF-8", null);

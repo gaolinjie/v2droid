@@ -1,12 +1,11 @@
 
 package com.v2ex.v2droid;
 
+import java.util.List;
+
+import org.apache.http.cookie.Cookie;
 import org.holoeverywhere.LayoutInflater;
 import org.holoeverywhere.app.Fragment;
-
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -14,6 +13,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.loopj.android.http.PersistentCookieStore;
 
 public class AboutFragment extends Fragment {
     private final class UrlListener implements OnClickListener {

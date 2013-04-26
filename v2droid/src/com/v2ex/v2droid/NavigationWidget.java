@@ -46,6 +46,6 @@ public class NavigationWidget extends LinearLayout {
             themePicker = R.id.themePickerMixed;
         }
         ((NavigationItem) findViewById(themePicker))
-                .setSelectionHandlerColorResource(R.color.holo_blue_light);
+                .setSelectionHandlerColorResource(R.color.holo_green_light);
     }
 }

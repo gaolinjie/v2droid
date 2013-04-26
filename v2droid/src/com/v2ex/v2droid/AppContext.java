@@ -44,7 +44,7 @@ public class AppContext extends Application {
 	 * @return
 	 * @throws AppException
 	 */
-	public String loginVerify(String account, String pwd) throws AppException {
+	public String loginVerify(String account, String pwd) throws AppException, Exception{
 		return ApiClient.login(this, account, pwd);
 	}
 	
@@ -82,6 +82,18 @@ public class AppContext extends Application {
 			setProperty(AppConfig.CONF_APP_UNIQUEID, uniqueID);
 		}
 		return uniqueID;
+	}
+	
+	public String replyTopic(String topicID, String content, String once) throws AppException {
+		return ApiClient.replyTopic(this, topicID, content, once);
+	}
+	
+	public String getTopicOnce(String url) throws AppException {
+		return ApiClient.getTopicOnce(this, url);
+	}
+	
+	public void loginTest() throws AppException, Exception{
+		ApiClient.loginTest(this);
 	}
 
 }

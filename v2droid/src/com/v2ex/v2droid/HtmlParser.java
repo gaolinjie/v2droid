@@ -18,15 +18,19 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-
 public class HtmlParser {
-	
+
 	static final String KEY_ID = "id";
 	static final String KEY_TITLE = "title";
 	static final String KEY_REPLIES = "replies";
 	static final String KEY_USERNAME = "username";
 	static final String KEY_AVATAR = "avatar";
 	static final String KEY_NODE = "node";
+
+	static final String KEY_HEADER_ID = "header_id";
+	static final String KEY_HEADER = "header";
+	static final String KEY_NAME = "name";
+	static final String KEY_LINK = "link";
 
 	// constructor
 	public HtmlParser() {
@@ -65,16 +69,15 @@ public class HtmlParser {
 	public static ArrayList<HashMap<String, String>> getTopics(String url,
 			ArrayList<HashMap<String, String>> topics) {
 		try {
-			//String html = getHtmlByUrl(url);
-			//Document doc = Jsoup.parse(html);
+			// String html = getHtmlByUrl(url);
+			// Document doc = Jsoup.parse(html);
 			Document doc = Jsoup.connect(url).get();
 			Elements items = doc.select("div[class=cell item]");
 
 			if (!items.isEmpty() && !topics.isEmpty()) {
-				topics.remove(topics.size()-1);
+				topics.remove(topics.size() - 1);
 			}
-			
-			
+
 			for (Element item : items) {
 				Element titleElement = item.select("span[class=item_title]>a")
 						.get(0);
@@ -91,7 +94,7 @@ public class HtmlParser {
 						.get(0);
 				String node = nodeElement.text();
 				System.out.println(node);
-				
+
 				// creating new HashMap
 				HashMap<String, String> map = new HashMap<String, String>();
 
@@ -111,9 +114,9 @@ public class HtmlParser {
 			System.out.println("访问[" + url + "]出现异常!");
 			e.printStackTrace();
 		}
-		
+
 		HashMap<String, String> mapMore = new HashMap<String, String>();
-		
+
 		mapMore.put(KEY_ID, MainActivity.MORE_TAG);
 		mapMore.put(KEY_TITLE, MainActivity.MORE_TAG);
 		mapMore.put(KEY_USERNAME, MainActivity.MORE_TAG);
@@ -127,6 +130,53 @@ public class HtmlParser {
 		return topics;
 	}
 
+	public static ArrayList<HashMap<String, String>> getNodes(String url,
+			ArrayList<HashMap<String, String>> nodes) {
+		try {
+			// String html = getHtmlByUrl(url);
+			// Document doc = Jsoup.parse(html);
+			Document doc = Jsoup.connect(url).get();
+			Elements items = doc.select("div#Wrapper")
+					.select("div[class=content]").select("div[class=box]")
+					.select("table");
+
+			int headerId = 0;
+			int nodeId = 0;
+
+			for (Element item : items) {
+				Elements headerElements = item.select("span[class=fade");
+				if (headerElements.isEmpty()) {
+					continue;
+				}
+
+				Element headerElement = headerElements.get(0);
+
+				Elements nodeItems = item.select("a");
+				for (Element nodeItem : nodeItems) {
+					HashMap<String, String> map = new HashMap<String, String>();
+
+					map.put(KEY_ID, Integer.toString(nodeId));
+					map.put(KEY_HEADER_ID, Integer.toString(headerId));
+					map.put(KEY_HEADER, headerElement.text());
+					map.put(KEY_NAME, nodeItem.text());
+					map.put(KEY_LINK, nodeItem.attr("href"));
+					nodes.add(map);
+
+					nodeId++;
+				}
+
+				headerId++;
+
+				System.out.println("table===> " + headerElement.toString());
+			}
+		} catch (IOException e) {
+			System.out.println("访问[" + url + "]出现异常!");
+			e.printStackTrace();
+		}
+
+		return nodes;
+	}
+
 	public static String getMatcher(String regex, String source) {
 		String result = "";
 		Pattern pattern = Pattern.compile(regex);
@@ -135,6 +185,39 @@ public class HtmlParser {
 			result = matcher.group(1);// 只取第一组
 		}
 		return result;
+	}
+
+	public static String getTopicOnce(String url) {
+		System.out.println("getTopicOnce======>");
+		String once = "";
+
+		String html = getHtmlByUrl(url);
+		System.out.println("html======>" + html);
+		Document doc = Jsoup.parse(html);
+
+		Element item = doc.select("input[name=once]").first();
+		if (item != null) {
+			once = item.attr("value");
+			System.out.println("once======>" + item.attr("value"));
+		}
+
+		return once;
+	}
+
+	public static String getTopicOnce2(String html) {
+		System.out.println("getTopicOnce======>");
+		String once = "";
+
+		// System.out.println("html======>" + html);
+		Document doc = Jsoup.parse(html);
+
+		Element item = doc.select("input[name=once]").first();
+		if (item != null) {
+			once = item.attr("value");
+			System.out.println("once======>" + item.attr("value"));
+		}
+
+		return once;
 	}
 
 }

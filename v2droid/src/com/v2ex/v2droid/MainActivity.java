@@ -1,4 +1,3 @@
-
 package com.v2ex.v2droid;
 
 import java.util.ArrayList;
@@ -19,203 +18,189 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 
 public class MainActivity extends SlidingActivity {
 	public static String TOPIC_ID = null;
 	public static String MORE_TAG;
-	
-	public static final String SHOW_LOGIN= "com.v2ex.v2droid.action.SHOW_LOGIN";
-	
-    private final class ListNavigationAdapter extends ArrayAdapter<MainNavigationItem> implements
-            OnItemClickListener {
-        private int lastSelectedItem = 0;
-        private int preSelectedItem = -1;
 
-        public ListNavigationAdapter() {
-            this(new ArrayList<MainNavigationItem>());
-        }
+	public static final String SHOW_LOGIN = "com.v2ex.v2droid.action.SHOW_LOGIN";
 
-        public ListNavigationAdapter(List<MainNavigationItem> list) {
-            super(MainActivity.this, android.R.id.text1, list);
-        }
+	private final class ListNavigationAdapter extends
+			ArrayAdapter<MainNavigationItem> implements OnItemClickListener {
+		private int lastSelectedItem = 0;
+		private int preSelectedItem = -1;
 
-        public void add(Class<? extends Fragment> clazz, int title) {
-            add(new MainNavigationItem(clazz, title));
-        }
+		public ListNavigationAdapter() {
+			this(new ArrayList<MainNavigationItem>());
+		}
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup container) {
-            NavigationItem view;
-            if (convertView == null) {
-                view = new NavigationItem(MainActivity.this);
-                view.setSelectionHandlerColorResource(R.color.holo_blue_light);
-            } else {
-                view = (NavigationItem) convertView;
-            }
-            MainNavigationItem item = getItem(position);
-            view.setLabel(item.title);
-            view.setSelectionHandlerVisiblity(lastSelectedItem == position ? View.VISIBLE
-                    : View.INVISIBLE);
-            return view;
-        }
+		public ListNavigationAdapter(List<MainNavigationItem> list) {
+			super(MainActivity.this, android.R.id.text1, list);
+		}
 
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int itemPosition,
-                long itemId) {
-        	int preSelected = preSelectedItem;
-        	preSelectedItem = lastSelectedItem;
-            lastSelectedItem = itemPosition;
-            
-            getIntent().putExtra(LIST_NAVIGATION_PAGE, itemPosition);
-            
-            MainNavigationItem item = getItem(itemPosition);
-            if (item.title == R.string.user) {
-            	if (!checkIsLogin()) {
-                	return;
-                }
-            }
-            
-            notifyDataSetInvalidated();
-            
-            if (preSelected == -1) {
-            	replaceFragment(item.getFragment());
-            } else {
-            	replaceFragment(item.getFragment(), getResources().getString(item.title));
-            }
-            
-            getSupportActionBar().setTitle(item.title);
+		public void add(Class<? extends Fragment> clazz, int title) {
+			add(new MainNavigationItem(clazz, title));
+		}
 
-            getSlidingMenu().showAbove(true);
-        }
-        
-        public void onBackPressed() {
-        	lastSelectedItem = preSelectedItem;
-            notifyDataSetInvalidated();
-        }
+		@Override
+		public View getView(int position, View convertView, ViewGroup container) {
+			NavigationItem view;
+			if (convertView == null) {
+				view = new NavigationItem(MainActivity.this);
+				view.setSelectionHandlerColorResource(R.color.holo_blue_light);
+			} else {
+				view = (NavigationItem) convertView;
+			}
+			MainNavigationItem item = getItem(position);
+			view.setLabel(item.title);
+			view.setSelectionHandlerVisiblity(lastSelectedItem == position ? View.VISIBLE
+					: View.INVISIBLE);
+			return view;
+		}
 
-    }
+		@Override
+		public void onItemClick(AdapterView<?> adapterView, View view,
+				int itemPosition, long itemId) {
+			int preSelected = preSelectedItem;
+			preSelectedItem = lastSelectedItem;
+			lastSelectedItem = itemPosition;
 
-    private static final class MainNavigationItem {
-        public final Class<? extends Fragment> clazz;
-        private Fragment fragment;
-        public final int title;
+			getIntent().putExtra(LIST_NAVIGATION_PAGE, itemPosition);
 
-        public MainNavigationItem(Class<? extends Fragment> clazz, int title) {
-            this.clazz = clazz;
-            this.title = title;
-        }
+			MainNavigationItem item = getItem(itemPosition);
+			if (item.title == R.string.user) {
+				if (!checkIsLogin()) {
+					return;
+				}
+			}
 
-        public Fragment getFragment() {
-            if (fragment == null) {
-                try {
-                    fragment = clazz.newInstance();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            return fragment;
-        }
-    }
+			notifyDataSetInvalidated();
 
-    private static final String LIST_NAVIGATION_PAGE = "listNavigationPage";
-    private ListNavigationAdapter adapter;
+			replaceFragment(item.getFragment());
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+			getSupportActionBar().setTitle(item.title);
 
-        MORE_TAG = getResources().getString(R.string.more);
-        		
-        if (adapter == null) {
-            adapter = new ListNavigationAdapter();
-        } else {
-            adapter.clear();
-        }
+			getSlidingMenu().showAbove(true);
+		}
 
-        adapter.add(TopicFragment.class, R.string.topic);
-        adapter.add(UserFragment.class, R.string.user);
-        adapter.add(UserFragment.class, R.string.favorite);
-        adapter.add(UserFragment.class, R.string.setting);
-        adapter.add(AboutFragment.class, R.string.about);     
+		public void onBackPressed() {
+			lastSelectedItem = preSelectedItem;
+			notifyDataSetInvalidated();
+		}
 
-        NavigationWidget navigationWidget = new NavigationWidget(this);
-        navigationWidget.init(adapter, adapter,
-                ThemeManager.getTheme(this), getIntent().getIntExtra(LIST_NAVIGATION_PAGE, 0));
-        setBehindContentView(navigationWidget);
+	}
 
-        final SlidingMenu si = getSlidingMenu();
-        si.setTouchModeAbove(SlidingMenu.TOUCHMODE_MARGIN);
-        si.setBehindWidthRes(R.dimen.demo_menu_width);
-        si.setShadowWidth(0);
+	private static final class MainNavigationItem {
+		public final Class<? extends Fragment> clazz;
+		private Fragment fragment;
+		public final int title;
 
-        final ActionBar ab = getSupportActionBar();
-        //ab.setTitle(R.string.app_name);
-        ab.setDisplayHomeAsUpEnabled(true);
-    }
-/*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+		public MainNavigationItem(Class<? extends Fragment> clazz, int title) {
+			this.clazz = clazz;
+			this.title = title;
+		}
 
-            getSupportMenuInflater().inflate(R.menu.main, menu);
-            return true;
+		public Fragment getFragment() {
+			if (fragment == null) {
+				try {
+					fragment = clazz.newInstance();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			return fragment;
+		}
+	}
 
-    }
+	private static final String LIST_NAVIGATION_PAGE = "listNavigationPage";
+	private ListNavigationAdapter adapter;
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                toggle();
-                break;
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-        return true;
-    }
-*/
-    public void replaceFragment(Fragment fragment) {
-        replaceFragment(fragment, null);
-    }
+		MORE_TAG = getResources().getString(R.string.more);
 
-    public void replaceFragment(Fragment fragment,
-            String backStackName) {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        ft.replace(android.R.id.content, fragment);
-        if (backStackName != null) {
-            ft.addToBackStack(backStackName);
-        }
-        ft.commit();
-    }
-    
-    public boolean checkIsLogin() {
-    	final AppContext ac = (AppContext)getApplication();
-        if (!ac.isLogin()) {
-        	Intent intent = new Intent(SHOW_LOGIN);
+		if (adapter == null) {
+			adapter = new ListNavigationAdapter();
+		} else {
+			adapter.clear();
+		}
+
+		adapter.add(TopicFragment.class, R.string.topic);
+		adapter.add(UserFragment.class, R.string.user);
+		adapter.add(MessageFragment.class, R.string.message);
+		adapter.add(UserFragment.class, R.string.favorite);
+		adapter.add(NodeFragment.class, R.string.node);
+		adapter.add(UserFragment.class, R.string.setting);
+		adapter.add(AboutFragment.class, R.string.about);
+
+		NavigationWidget navigationWidget = new NavigationWidget(this);
+		navigationWidget.init(adapter, adapter, ThemeManager.getTheme(this),
+				getIntent().getIntExtra(LIST_NAVIGATION_PAGE, 0));
+		setBehindContentView(navigationWidget);
+
+		final SlidingMenu si = getSlidingMenu();
+		si.setTouchModeAbove(SlidingMenu.TOUCHMODE_MARGIN);
+		si.setBehindWidthRes(R.dimen.demo_menu_width);
+		si.setShadowWidth(0);
+
+		final ActionBar ab = getSupportActionBar();
+		// ab.setTitle(R.string.app_name);
+		ab.setDisplayHomeAsUpEnabled(true);
+	}
+
+	/*
+	 * @Override public boolean onCreateOptionsMenu(Menu menu) {
+	 * 
+	 * getSupportMenuInflater().inflate(R.menu.main, menu); return true;
+	 * 
+	 * }
+	 * 
+	 * @Override public boolean onOptionsItemSelected(MenuItem item) { switch
+	 * (item.getItemId()) { case android.R.id.home: toggle(); break;
+	 * 
+	 * default: return super.onOptionsItemSelected(item); } return true; }
+	 */
+	public void replaceFragment(Fragment fragment) {
+		replaceFragment(fragment, null);
+	}
+
+	public void replaceFragment(Fragment fragment, String backStackName) {
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+		ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+		ft.replace(android.R.id.content, fragment);
+		if (backStackName != null) {
+			ft.addToBackStack(backStackName);
+		}
+		ft.commit();
+	}
+
+	public boolean checkIsLogin() {
+		final AppContext ac = (AppContext) getApplication();
+		if (!ac.isLogin()) {
+			Intent intent = new Intent(SHOW_LOGIN);
 			startActivity(intent);
-        }
-        
-        return ac.isLogin();
-    }
+		}
 
-    public void setDarkTheme(View v) {
-        ThemeManager.restartWithDarkTheme(this);
-    }
+		return ac.isLogin();
+	}
 
-    public void setLightTheme(View v) {
-        ThemeManager.restartWithLightTheme(this);
-    }
+	public void setDarkTheme(View v) {
+		ThemeManager.restartWithDarkTheme(this);
+	}
 
-    public void setMixedTheme(View v) {
-        ThemeManager.restartWithMixedTheme(this);
-    }
-    
-    @Override
-    public void onBackPressed() {
-    	super.onBackPressed();
-    	adapter.onBackPressed();
-    }
+	public void setLightTheme(View v) {
+		ThemeManager.restartWithLightTheme(this);
+	}
+
+	public void setMixedTheme(View v) {
+		ThemeManager.restartWithMixedTheme(this);
+	}
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		adapter.onBackPressed();
+	}
 }
