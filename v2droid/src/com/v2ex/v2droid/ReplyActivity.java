@@ -82,26 +82,7 @@ public class ReplyActivity extends Activity {
 			public void run() {
 				System.out.println("reply run=====>");
 				Message msg =new Message();
-				try {
-					String result;
-					String strTopic = "http://www.v2ex.com/t/" + topicID;
-					String content = replyEdit.getText().toString();
-			    	//String once = HtmlParser.getTopicOnce(strTopic);
-					AppContext ac = (AppContext)getApplication(); 
-
-					String once = ac.getTopicOnce(strTopic);
-						result = ac.replyTopic(topicID, content, once);
-			   
-	                
-	                if(!StringUtils.isEmpty(result)){
-	                	msg.what = 1;//成功
-	                }else{
-	                	msg.what = 0;//失败
-	                }
-	            } catch (AppException e) {
-	            	e.printStackTrace();
-			    	msg.what = -1;
-	            }
+				
 				handler.sendMessage(msg);
 			}
 		}.start();

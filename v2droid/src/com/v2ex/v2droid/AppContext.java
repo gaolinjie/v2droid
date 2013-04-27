@@ -8,6 +8,7 @@ import org.holoeverywhere.ThemeManager;
 import org.holoeverywhere.app.Application;
 import org.holoeverywhere.app.Application.Config.PreferenceImpl;
 
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 
@@ -17,8 +18,7 @@ public class AppContext extends Application {
         LayoutInflater.remap(WidgetContainer.class);
         LayoutInflater.remap(NavigationItem.class);
         ThemeManager.setDefaultTheme(ThemeManager.DARK);
-        // Android 2.1 incorrect process FULLSCREEN flag
-        // ThemeManager.modify(ThemeManager.FULLSCREEN);
+        
         ThemeManager.map(ThemeManager.LIGHT,
                 R.style.Holo_v2droid_Theme_Light);
         ThemeManager.map(ThemeManager.MIXED,
@@ -26,24 +26,60 @@ public class AppContext extends Application {
         ThemeManager.map(ThemeManager.DARK,
                 R.style.Holo_v2droid_Theme);
     }
+    private static final String APP_PREFS = "AppPrefsFile";
+	private static final String LOGIN_STATE = "login_state";
+	private static final String USER_NAME = "user_name";
+	private static final String PASS_WORD = "pass_word";
     
     private boolean login = false;	//登录状态
+    private SharedPreferences prefs= null;
+    private String username;
+    private String password;
     
-    /**
-	 * 用户是否登录
-	 * @return
-	 */
 	public boolean isLogin() {
 		return login;
 	}
+	
+	public String getUserName() {
+		return username;
+	}
+	
+	public String getPassWord() {
+		return password;
+	}
+	
+	public boolean getLogin() {
+		prefs = getSharedPreferences(APP_PREFS, 0);
+		String strLogin = prefs.getString(LOGIN_STATE, null);
+		
+		if (strLogin != null) {
+			if (strLogin == "TRUE") {
+				login = true;
+				username = prefs.getString(USER_NAME, null);
+				password = prefs.getString(PASS_WORD, null);
+			} else {
+				login = false;
+			}
+		} else {
+			login = false;
+		}
+		return login;
+	}
+	
+	public void setLogin(boolean b, String u, String p) {
+		login = b;
+		
+		if (prefs == null) {
+			prefs = getSharedPreferences(APP_PREFS, 0);
+		}
+		
+		SharedPreferences.Editor prefEditor = prefs.edit();
+		prefEditor.putString(LOGIN_STATE, b?"TRUE":"FALSE");
+		prefEditor.putString(USER_NAME, u);
+		prefEditor.putString(PASS_WORD, p);
+		prefEditor.commit();
+	}
     
-    /**
-	 * 用户登录验证
-	 * @param account
-	 * @param pwd
-	 * @return
-	 * @throws AppException
-	 */
 	public String loginVerify(String account, String pwd) throws AppException, Exception{
 		return ApiClient.login(this, account, pwd);
 	}
@@ -56,10 +92,6 @@ public class AppContext extends Application {
 		return AppConfig.getAppConfig(this).get(key);
 	}
 	
-	/**
-	 * 获取App安装包信息
-	 * @return
-	 */
 	public PackageInfo getPackageInfo() {
 		PackageInfo info = null;
 		try { 
@@ -71,10 +103,6 @@ public class AppContext extends Application {
 		return info;
 	}
 	
-	/**
-	 * 获取App唯一标识
-	 * @return
-	 */
 	public String getAppId() {
 		String uniqueID = getProperty(AppConfig.CONF_APP_UNIQUEID);
 		if(StringUtils.isEmpty(uniqueID)){
@@ -82,18 +110,6 @@ public class AppContext extends Application {
 			setProperty(AppConfig.CONF_APP_UNIQUEID, uniqueID);
 		}
 		return uniqueID;
-	}
-	
-	public String replyTopic(String topicID, String content, String once) throws AppException {
-		return ApiClient.replyTopic(this, topicID, content, once);
-	}
-	
-	public String getTopicOnce(String url) throws AppException {
-		return ApiClient.getTopicOnce(this, url);
-	}
-	
-	public void loginTest() throws AppException, Exception{
-		ApiClient.loginTest(this);
 	}
 
 }
