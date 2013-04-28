@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:indeterminateOnly="true"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="-5dp" />
     
     <ListView
         android:id="@+id/pull_refresh_list"
@@ -42,5 +43,5 @@
         android:layout_height="wrap_content"
         android:indeterminateOnly="true"
         android:layout_above="@id/bottom_line"
-        android:layout_marginBottom="-10dp" />
+        android:layout_marginBottom="-11dp" />
 </RelativeLayout>

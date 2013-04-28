@@ -28,11 +28,11 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.holoeverywhere.app.Activity;
+import org.holoeverywhere.widget.ProgressBar;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -48,6 +48,10 @@ public class LoginActivity extends Activity {
 	private EditText usernameEdit;
 	private EditText passwordEdit;
 	private InputMethodManager imm;
+	private ProgressBar progressBar;
+	
+	String username;
+	String password;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,22 +63,22 @@ public class LoginActivity extends Activity {
 
 		usernameEdit = (EditText) findViewById(R.id.username_edit);
 		passwordEdit = (EditText) findViewById(R.id.password_edit);
+		
+		progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
 		// 添加登陆按钮监听
 		loginButton = (Button) findViewById(R.id.login_button);
 		loginButton.setOnClickListener(bl);
-
-		new GetDataTask().execute();
-
 	}
 
 	private class ButtonListener implements View.OnClickListener {
 		public void onClick(View view) {
+			progressBar.setVisibility(View.VISIBLE);
 			// 隐藏软键盘
 			imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
-			String username = usernameEdit.getText().toString();
-			String password = passwordEdit.getText().toString();
+			username = usernameEdit.getText().toString();
+			password = passwordEdit.getText().toString();
 
 			// 判断输入
 			if (StringUtils.isEmpty(username)) {
@@ -89,11 +93,11 @@ public class LoginActivity extends Activity {
 			}
 
 			System.out.println("onClick=====>");
-
-			login(username, password);
+			
+			new GetDataTask().execute();
 		}
 	}
-
+/*
 	// 登录验证
 	private void login(final String account, final String pwd) {
 		final Handler handler = new Handler() {
@@ -116,45 +120,43 @@ public class LoginActivity extends Activity {
 			public void run() {
 				System.out.println("login run=====>");
 				Message msg = new Message();
-				try {
-					AppContext ac = (AppContext) getApplication();
-					String s = ac.loginVerify(account, pwd);
 
-					if (!StringUtils.isEmpty(s)) {
-						msg.what = 1;// 成功
-						msg.obj = 1;
-					} else {
-						msg.what = 0;// 失败
-						msg.obj = 0;
-					}
-				} catch (AppException e) {
-					e.printStackTrace();
-					msg.what = -1;
-					msg.obj = e;
-				} catch (Exception e) {
-					e.printStackTrace();
-					msg.what = -1;
-					msg.obj = e;
-				}
 				handler.sendMessage(msg);
 			}
 		}.start();
 	}
-
+*/
 	private class GetDataTask extends AsyncTask<Void, Void, String[]> {
 
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
-/*
+			
+			System.out.println("username=====>"
+					+ username);
+			
+			System.out.println("password=====>"
+					+ password);
+			
+			AppContext ac = (AppContext) getApplication();
+			
 			try {
-				LoginTest();
-			} catch (ClientProtocolException e) {
+				if (ApiClient.login(ac, username, password)) {
+					//AppConfig.getAppConfig(ac).setLogin(true);
+					//ApiClient.storeCookies(ac);
+					Intent intent = new Intent();
+	                intent.putExtra("username", username);
+	                intent.putExtra("messages", "3");
 
+	                LoginActivity.this.setResult(RESULT_OK, intent);
+					LoginActivity.this.finish();
+				}
+				
 			} catch (IOException e) {
-
-			}*/
-
+				
+			}
+					
+			
 			return s;
 		}
 
@@ -224,6 +226,10 @@ public class LoginActivity extends Activity {
 			System.out.println("Set-Cookie=====>" + header.getValue());
 		}
 		int statusCode = httpResponse.getStatusLine().getStatusCode();
+		
+		System.out.println("Post-Cookie=====>"
+				+ localContext.getAttribute(ClientContext.COOKIE_STORE)
+						.toString());
 
 		HttpClient httpClient3 = new DefaultHttpClient();
 

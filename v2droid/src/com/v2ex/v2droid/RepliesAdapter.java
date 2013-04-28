@@ -51,9 +51,9 @@ public class RepliesAdapter extends BaseAdapter {
         replyRow = data.get(position);
         
         // Setting all values in listview
-        username.setText(replyRow.get(ContentFragment.KEY_USERNAME));
-        reply.setText(replyRow.get(ContentFragment.KEY_CONTENT));
-        imageLoader.DisplayImage(replyRow.get(ContentFragment.KEY_AVATAR), thumb_image);
+        username.setText(replyRow.get(ContentActivity.KEY_USERNAME));
+        reply.setText(replyRow.get(ContentActivity.KEY_CONTENT));
+        imageLoader.DisplayImage(replyRow.get(ContentActivity.KEY_AVATAR), thumb_image);
         return vi;
     }
 }

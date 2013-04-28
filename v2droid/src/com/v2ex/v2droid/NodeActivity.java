@@ -23,8 +23,7 @@ public class NodeActivity extends Activity {
 
 	private final static String TAG = "ContentFragment";
 
-	public static final String SHOW_CONTENT = "com.v2ex.v2droid.action.SHOW_CONTENT";
-	public static final String SHOW_NEW = "com.v2ex.v2droid.action.SHOW_NEW";
+	
 
 	static final String KEY_ID = "id";
 	static final String KEY_TITLE = "title";
@@ -90,7 +89,7 @@ public class NodeActivity extends Activity {
 				} else {
 					String tid = topicList.get(position).get(
 							TopicFragment.KEY_ID);
-					Intent contentIntent = new Intent(SHOW_CONTENT);
+					Intent contentIntent = new Intent(Intents.SHOW_CONTENT);
 					contentIntent.putExtra("EXTRA_TOPIC_ID", tid);
 					startActivity(contentIntent);
 				}
@@ -114,7 +113,7 @@ public class NodeActivity extends Activity {
 			break;
 
 		case R.id.newtopic:
-			Intent intent = new Intent(SHOW_NEW);
+			Intent intent = new Intent(Intents.SHOW_NEW);
 			startActivity(intent);
 			break;
 

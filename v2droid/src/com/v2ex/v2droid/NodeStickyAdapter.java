@@ -17,7 +17,7 @@ import com.tonicartos.widget.stickygridheaders.StickyGridHeadersSimpleAdapter;
  * 
  * @param <T>
  */
-public class StickyGridHeadersSimpleArrayListAdapter<T> extends BaseAdapter
+public class NodeStickyAdapter<T> extends BaseAdapter
 		implements StickyGridHeadersSimpleAdapter {
 	private int mHeaderResId;
 	private LayoutInflater mInflater;
@@ -30,7 +30,7 @@ public class StickyGridHeadersSimpleArrayListAdapter<T> extends BaseAdapter
 	static final String KEY_NAME = "name";
 	static final String KEY_LINK = "LINK";
 
-	public StickyGridHeadersSimpleArrayListAdapter(Context context,
+	public NodeStickyAdapter(Context context,
 			ArrayList<T> items, int headerResId, int itemResId) {
 		init(context, items, headerResId, itemResId);
 	}

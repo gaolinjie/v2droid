@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 
 public class Splash extends Activity {
-	
-	public static final String SHOW_MAIN = "com.v2ex.v2droid.action.SHOW_MAIN";
 
 	private final int SPLASH_DISPLAY_LENGHT = 1000;
 

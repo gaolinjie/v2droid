@@ -1,27 +1,19 @@
 package com.v2ex.v2droid;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import org.apache.commons.httpclient.Cookie;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
-import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.CookieStore;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HttpContext;
+import org.jsoup.Connection;
+import org.jsoup.Connection.Method;
+import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -44,16 +36,28 @@ public class ApiClient {
 	private final static int TIMEOUT_SOCKET = 20000;
 	private final static int RETRY_TIME = 1;
 
-	private static String appCookie;
 	private static String appUserAgent;
+	
+	private static CookieStore cookieStore = null;
+	private static HttpContext cookieContext = null;
+	
+	static final String KEY_ID = "id";
+	static final String KEY_TITLE = "title";
+	static final String KEY_REPLIES = "replies";
+	static final String KEY_USERNAME = "username";
+	static final String KEY_AVATAR = "avatar";
+	static final String KEY_NODE = "node";
 
-	public static void cleanCookie() {
-		appCookie = "";
-	}
+	static final String KEY_HEADER_ID = "header_id";
+	static final String KEY_HEADER = "header";
+	static final String KEY_NAME = "name";
+	static final String KEY_LINK = "link";
+	
+	private static Map<String, String> mCookies = new HashMap<String, String>();
 	
 	private static String getUserAgent(AppContext appContext) {
 		if(appUserAgent == null || appUserAgent == "") {
-			StringBuilder ua = new StringBuilder("OSChina.NET");
+			StringBuilder ua = new StringBuilder("V2EX.COM");
 			ua.append('/'+appContext.getPackageInfo().versionName+'_'+appContext.getPackageInfo().versionCode);//App版本
 			ua.append("/Android");//手机系统平台
 			ua.append("/"+android.os.Build.VERSION.RELEASE);//手机系统版本
@@ -64,472 +68,345 @@ public class ApiClient {
 		return appUserAgent;
 	}
 	
-	public static String getCookie(AppContext appContext) {
-		if(appCookie == null || appCookie == "") {
-			appCookie = appContext.getProperty("cookie");
+	private static Map<String, String> getCookies(AppContext appContext) {
+		return mCookies;
+	}
+
+	public static Document get(AppContext appContext, String url, String referrer) throws IOException {
+		Map<String, String> cookies = getCookies(appContext);
+		String userAgent = getUserAgent(appContext);
+		
+	    Connection connection = Jsoup.connect(url)
+	    						.cookies(cookies)
+	    						.referrer(referrer)
+	    						.userAgent(userAgent);
+	    
+	    Response response = connection.execute();
+	    cookies.putAll(response.cookies());
+	    mCookies = cookies;
+	    return response.parse();
+	}
+	
+	public static Document post(AppContext appContext, String url, String referrer, List<NameValuePair> params) throws IOException {
+		Map<String, String> cookies = getCookies(appContext);
+		String userAgent = getUserAgent(appContext);
+		
+	    Connection connection = Jsoup.connect(url)
+	    						.cookies(cookies)
+	    						.referrer(referrer)
+	    						.userAgent(userAgent)
+	    						.method(Method.POST);
+	    
+	    for (NameValuePair param : params) {
+	    	connection = connection.data(param.getName(), param.getValue());
+	    }
+	        
+	    Response response = connection.execute();
+	    cookies.putAll(response.cookies());
+	    mCookies = cookies;
+	    return response.parse();
+	}
+	
+	public static boolean login (AppContext appContext, String username, String password) throws IOException {
+		String once = getOnce(get(appContext, URLs.LOGIN_VALIDATE_HTTP, URLs.HOST));
+		
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("next", "/"));
+		params.add(new BasicNameValuePair("u", username));
+		params.add(new BasicNameValuePair("p", password));
+		params.add(new BasicNameValuePair("once", once));
+		params.add(new BasicNameValuePair("next", "/"));
+		
+		post(appContext, URLs.LOGIN_VALIDATE_HTTP, URLs.LOGIN_VALIDATE_HTTP, params);
+		
+		Map<String, String> cookies = getCookies(appContext);
+		
+		if (cookies.containsKey("auth")) {
+			return true;
 		}
-		return appCookie;
+
+		/*
+			for (Entry<String, String> cookie : cookies.entrySet()) {
+				System.out.println("cookie.getKey()=====>"
+						+ cookie.getKey());
+				
+				if (cookie.getKey() == "auth") {
+					System.out.println("return true=====>"
+							+ cookie.getKey());
+					return true;
+				}
+			}
+		*/
+		
+		return false;
+	}
+	
+	public static String getOnce(Document doc) {
+		String once = "";
+
+		Element item = doc.select("input[name=once]").first();
+		if (item != null) {
+			once = item.attr("value");
+			System.out.println("once======>" + item.attr("value"));
+		}
+
+		return once;
 	}
 	
 	
+	
+	
+	
+	/*
+	 * 
+	 public static CookieStore getCookieStore(AppContext appContext) {
+		return cookieStore;
+	}
+	
+	public static HttpContext getCookieContext(AppContext appContext) {
+		if (cookieContext == null) {
+			cookieStore = new BasicCookieStore();
+			if(AppConfig.getAppConfig(appContext).getLogin()) {
+				PersistentCookieStore  pcs = new PersistentCookieStore(appContext);
+				List<Cookie> cookieList = pcs.getCookies();
+				for (Cookie cookie : cookieList) {
+					cookieStore.addCookie(cookie);
+				}
+			}
+				
+			cookieContext = new BasicHttpContext();
+			cookieContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+		}
+		System.out.println("getCookieContext=====>"
+				+ cookieContext.getAttribute(ClientContext.COOKIE_STORE)
+						.toString());
+		return cookieContext;
+	}
+	
+	public static void storeCookies(AppContext appContext) {
+		PersistentCookieStore  pcs = new PersistentCookieStore(appContext);
+		CookieStore c = getCookieStore(appContext);
+		if (c != null) {
+			List<Cookie> cookieList = c.getCookies();
+			for (Cookie cookie : cookieList) {
+				pcs.addCookie(cookie);
+			}
+		}
+	}
+	
 	private static HttpClient getHttpClient() {        
-        HttpClient httpClient = new HttpClient();
+        HttpClient httpClient = new DefaultHttpClient();
 		// 设置 HttpClient 接收 Cookie,用与浏览器一样的策略
-		httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-        // 设置 默认的超时重试处理策略
-		httpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
-		// 设置 连接超时时间
-		httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(TIMEOUT_CONNECTION);
-		// 设置 读数据超时时间 
-		httpClient.getHttpConnectionManager().getParams().setSoTimeout(TIMEOUT_SOCKET);
-		// 设置 字符集
-		httpClient.getParams().setContentCharset(UTF_8);
+        HttpClientParams.setCookiePolicy(httpClient.getParams(),
+				CookiePolicy.BROWSER_COMPATIBILITY);
 		return httpClient;
 	}	
 	
-	private static GetMethod getHttpGet(String url, String cookie, String userAgent) {
-		GetMethod httpGet = new GetMethod(url);
-		// 设置 请求超时时间
-		httpGet.getParams().setSoTimeout(TIMEOUT_SOCKET);
-		httpGet.setRequestHeader("Host", URLs.HOST);
-		httpGet.setRequestHeader("Connection","Keep-Alive");
-		httpGet.setRequestHeader("Cookie", cookie);
-		//httpGet.setRequestHeader("User-Agent", userAgent);
+	private static HttpGet getHttpGet(String url, String userAgent, String referer) {
+		HttpGet httpGet = new HttpGet(url);
+		//httpGet.setHeader("Host", URLs.HOST);
+		httpGet.setHeader("Connection","Keep-Alive");
+		//httpGet.setHeader("User-Agent", userAgent);
+		if (referer!=null) {
+			httpGet.setHeader("Referer", referer);
+		}
 		return httpGet;
 	}
 	
-	private static PostMethod getHttpPost(String url, String cookie, String userAgent) {
-		PostMethod httpPost = new PostMethod(url);
-		// 设置 请求超时时间
-		httpPost.getParams().setSoTimeout(TIMEOUT_SOCKET);
-		httpPost.setRequestHeader("Host", URLs.HOST);
-		httpPost.setRequestHeader("Connection","Keep-Alive");
-		httpPost.setRequestHeader("Cookie", cookie);
-		//httpPost.setRequestHeader("User-Agent", userAgent);
-		
+	private static HttpPost getHttpPost(String url, String userAgent, String referer) {
+		HttpPost httpPost = new HttpPost(url);
+		//httpPost.setHeader("Host", URLs.HOST);
+		httpPost.setHeader("Connection","Keep-Alive");
+		//httpPost.setHeader("User-Agent", userAgent);
+		if (referer!=null) {
+			httpPost.setHeader("Referer", referer);
+		}
 		return httpPost;
 	}
 	
-	/**
-	 * get请求URL
-	 * @param url
-	 * @throws AppException 
-	 */
-	private static String http_get(AppContext appContext, String url) throws AppException {	
-		//System.out.println("get_url==> "+url);
-		String cookie = getCookie(appContext);
+	private static String http_get(AppContext appContext, String url, String referer) {	
 		String userAgent = getUserAgent(appContext);
-		System.out.println("http_get cookie==> "+cookie);
-		HttpClient httpClient = null;
-		GetMethod httpGet = null;
+		HttpClient httpClient = getHttpClient();
+		HttpGet httpGet = getHttpGet(url, userAgent, referer);
+		
+		//HttpContext localContext = getCookieContext(appContext);
 
 		String responseBody = "";
-		int time = 0;
-		do{
-			try 
-			{
-				httpClient = getHttpClient();
-				httpGet = getHttpGet(url, cookie, userAgent);			
-				int statusCode = httpClient.executeMethod(httpGet);
-				if (statusCode != HttpStatus.SC_OK) {
-					throw AppException.http(statusCode);
+		try {
+			HttpResponse responce = httpClient.execute(httpGet, getCookieContext(appContext));
+			int resStatu = responce.getStatusLine().getStatusCode();
+			if (resStatu == HttpStatus.SC_OK) {
+				HttpEntity entity = responce.getEntity();
+				if (entity != null) {
+					responseBody = EntityUtils.toString(entity);
 				}
-				
-				Cookie[] cookies = httpClient.getState().getCookies();
-	            String tmpcookies = "";
-	            for (Cookie ck : cookies) {
-	                tmpcookies += ck.toString()+";";
-	            }
-	            //保存cookie   
-        		if(appContext != null && tmpcookies != "" && (cookie==null||cookie=="")){
-        			appContext.setProperty("cookie", tmpcookies);
-        			appCookie = tmpcookies;
-        			System.out.println("appCookie==> "+appCookie);
-        		}
-        		
-				responseBody = httpGet.getResponseBodyAsString();
-				//System.out.println("XMLDATA=====>"+responseBody);
-				break;				
-			} catch (HttpException e) {
-				time++;
-				if(time < RETRY_TIME) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e1) {} 
-					continue;
-				}
-				// 发生致命的异常，可能是协议不对或者返回的内容有问题
-				e.printStackTrace();
-				throw AppException.http(e);
-			} catch (IOException e) {
-				time++;
-				if(time < RETRY_TIME) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e1) {} 
-					continue;
-				}
-				// 发生网络异常
-				e.printStackTrace();
-				throw AppException.network(e);
-			} finally {
-				// 释放连接
-				httpGet.releaseConnection();
-				httpClient = null;
 			}
-		}while(time < RETRY_TIME);
-		
-		//responseBody = responseBody.replaceAll("\\p{Cntrl}", "");
+		} catch (Exception e) {
+			System.out.println("访问" + url + "出现异常!");
+			e.printStackTrace();
+		} finally {
+			httpClient.getConnectionManager().shutdown();
+		}
+		System.out.println("http_get-Cookie=====>"
+				+ getCookieContext(appContext).getAttribute(ClientContext.COOKIE_STORE)
+						.toString());
 
 		return responseBody;
 	}
 	
-	/**
-	 * 公用post方法
-	 * @param url
-	 * @param params
-	 * @param files
-	 * @throws AppException
-	 */
-	private static String _post(AppContext appContext, String url, Part[] parts) throws AppException {
-		System.out.println("post_url==> "+url);
-		String cookie = getCookie(appContext);
+	private static String http_post(AppContext appContext, String url, String referer, List<NameValuePair> params) {	
 		String userAgent = getUserAgent(appContext);
+		HttpClient httpClient = getHttpClient();
+		HttpPost httpPost = getHttpPost(url, userAgent, referer);
 		
-		HttpClient httpClient = null;
-		PostMethod httpPost = null;
-
+		//HttpContext localContext = getCookieContext(appContext);
 		
-		String responseBody = "";
-		int time = 0;
-		do{
-			try 
-			{
-				System.out.println("getHttpClient==> ");
-				httpClient = getHttpClient();
-				httpPost = getHttpPost(url, cookie, userAgent);	
-				httpPost.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-				httpPost.setRequestHeader("Content-Length", "application/x-www-form-urlencoded");
-		        httpPost.setRequestEntity(new MultipartRequestEntity(parts,httpPost.getParams()));		        
-		        int statusCode = httpClient.executeMethod(httpPost);
-		        System.out.println("statusCode==> "+statusCode);	 
-		        Header[]  heade = httpPost.getRequestHeaders();
-		        if ((null != heade) && (0 != heade.length)) {
-					for (Header h : heade) {
-						System.out.println("heade==> "+h.getValue());
-					}
-					
-					//return urlAddress;
-				}
-		        
-		        if(statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_MOVED_TEMPORARILY ) 
-		        {
-		        	System.out.println("cookies=====>");
-		            Cookie[] cookies = httpClient.getState().getCookies();
-		            String tmpcookies = "";
-		            for (Cookie ck : cookies) {
-		                tmpcookies += ck.toString()+";";
-		            }
-		            //保存cookie   
-	        		if(appContext != null && tmpcookies != "" && (cookie==null||cookie=="")){
-	        			appContext.setProperty("cookie", tmpcookies);
-	        			appCookie = tmpcookies;
-	        			System.out.println("appCookie==> "+appCookie);
-	        		}
-	        		
-	        		if (HttpStatus.SC_MOVED_TEMPORARILY == statusCode) {
-						Header[]  headers = httpPost.getResponseHeaders("Location");
-						if ((null != headers) && (0 != headers.length)) {
-							String urlAddress = headers[headers.length - 1].getValue();
-							System.out.println("Location==> "+urlAddress);
-							//return urlAddress;
-						}
-						
-						//String testhtml = http_get(appContext, "http://www.v2ex.com/t/66388");
-						//System.out.println("testhtml====================================> "+testhtml);
-					}
-	        		
-	        		
-		        } else {
-		        	throw AppException.http(statusCode);
-		        }
-		     	responseBody = httpPost.getResponseBodyAsString();
-		        System.out.println("XMLDATA=====>"+responseBody);
-		     	break;	     	
-			} catch (HttpException e) {
-				time++;
-				if(time < RETRY_TIME) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e1) {} 
-					continue;
-				}
-				// 发生致命的异常，可能是协议不对或者返回的内容有问题
-				e.printStackTrace();
-				throw AppException.http(e);
-			} catch (IOException e) {
-				time++;
-				if(time < RETRY_TIME) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e1) {} 
-					continue;
-				}
-				// 发生网络异常
-				e.printStackTrace();
-				throw AppException.network(e);
-			} finally {
-				// 释放连接
-				httpPost.releaseConnection();
-				httpClient = null;
-			}
-		}while(time < RETRY_TIME);
-        
-        responseBody = responseBody.replaceAll("\\p{Cntrl}", "");
-        
-        InputStream is = new ByteArrayInputStream(responseBody.getBytes());
-
-        return is.toString();
-	}
-	
-	/**
-	 * post请求URL
-	 * @param url
-	 * @param params
-	 * @param files
-	 * @throws AppException 
-	 * @throws IOException 
-	 * @throws  
-	 */
-	private static String http_post(AppContext appContext, String url, Part[] parts) throws AppException, IOException {
-        return _post(appContext, url, parts);  
-	}
-	
-	/**
-	 * 登录， 自动处理cookie
-	 * @param url
-	 * @param username
-	 * @param pwd
-	 * @return
-	 * @throws AppException
-	 *//*
-	public static String login(AppContext appContext, String username, String pwd) throws AppException {
-		String html = http_get(appContext, "http://www.v2ex.com/signin");
-		String once = getHtmlOnce(html);
-		
-		Part[] parts = new Part[5];
-		parts[0] = new StringPart("next", "/", UTF_8);
-		parts[1] = new StringPart("u", username, UTF_8);
-		parts[2] = new StringPart("p", pwd, UTF_8);
-		parts[3] = new StringPart("once", once, UTF_8);
-		parts[4] = new StringPart("next", "/", UTF_8);
-		
-		for (int i=0; i<parts.length; i++) {
-			System.out.println("postkey====>"+parts[i].toString());
-		}
-				
-		String loginurl = URLs.LOGIN_VALIDATE_HTTP;
-		
-		try{
-			return _post(appContext, loginurl, parts);		
-		}catch(Exception e){
-			if(e instanceof AppException)
-				throw (AppException)e;
-			throw AppException.network(e);
-		}
-	}*/
-	
-	public static String replyTopic(AppContext appContext, String topicID, String content, String once) throws AppException {
-		
-		Part[] parts = new Part[2];
-		parts[0] = new StringPart("content", content, UTF_8);
-		parts[1] = new StringPart("once", once, UTF_8);
-		System.out.println("onceonceonceonceonceonceonce======>"+once);
-		
-		try{
-			return http_post(appContext, URLs.REPLY_TOPIC + topicID, parts);		
-		}catch(Exception e){
-			if(e instanceof AppException)
-				throw (AppException)e;
-			throw AppException.network(e);
-		}
-	}
-	
-	public static String getTopicOnce(AppContext appContext, String url) {
-		System.out.println("getTopicOnce======>");
-		String once="";
 		try {
-		String html = http_get(appContext, url);
-		
-		System.out.println("html======>" + html);
-		Document doc = Jsoup.parse(html);
-		
-		Element item = doc.select("input[name=once]").first();
-		if (item!=null) {
-			once = item.attr("value");
-			System.out.println("once======>" + item.attr("value"));
-		}
-		} catch(AppException e) {
-			
-		}
-		return once;
-	}
-	
-	
-	public static String getHtmlOnce(String html) {
-		System.out.println("getHtmlOnce======>");
-		String once=null;
-		
-		System.out.println("html======>" + html);
-		Document doc = Jsoup.parse(html);
-		
-		Element item = doc.select("input[name=once]").first();
-		if (item!=null) {
-			once = item.attr("value");
-			System.out.println("once======>" + item.attr("value"));
+			httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
 		}
 
-		return once;
+		String responseBody = "";
+		try {
+			HttpResponse responce = httpClient.execute(httpPost, getCookieContext(appContext));
+			int resStatu = responce.getStatusLine().getStatusCode();
+			if (resStatu == HttpStatus.SC_OK) {
+				HttpEntity entity = responce.getEntity();
+				if (entity != null) {
+					responseBody = EntityUtils.toString(entity);
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("访问" + url + "出现异常!");
+			e.printStackTrace();
+		} finally {
+			httpClient.getConnectionManager().shutdown();
+		}
+		System.out.println("http_post-Cookie=====>"
+				+ getCookieContext(appContext).getAttribute(ClientContext.COOKIE_STORE)
+						.toString());
+
+		return responseBody;
 	}
 	
-	public static boolean sendPostRequest(String path, Map<String, String> params, String enc) throws Exception{
-		// title=dsfdsf&timelength=23&method=save
-		StringBuilder sb = new StringBuilder();
-		if(params!=null && !params.isEmpty()){
-			for(Map.Entry<String, String> entry : params.entrySet()){
-				sb.append(entry.getKey()).append('=')
-					.append(URLEncoder.encode(entry.getValue(), enc)).append('&'); 
+	
+	public static boolean login (AppContext appContext, String username, String password) {
+		
+		System.out.println("pre_get-Cookie=====>"
+				+ getCookieContext(appContext).getAttribute(ClientContext.COOKIE_STORE)
+						.toString());
+		String getHtml = http_get(appContext, URLs.LOGIN_VALIDATE_HTTP, null);
+		
+		String once = HtmlParser.getTopicOnce2(getHtml);
+		System.out.println("once=====>" + once);
+		
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("next", "/"));
+		params.add(new BasicNameValuePair("u", username));
+		params.add(new BasicNameValuePair("p", password));
+		params.add(new BasicNameValuePair("once", once));
+		params.add(new BasicNameValuePair("next", "/"));
+		
+		System.out.println("pre_post-Cookie=====>"
+				+ getCookieContext(appContext).getAttribute(ClientContext.COOKIE_STORE)
+						.toString());
+		http_post(appContext, URLs.LOGIN_VALIDATE_HTTP, URLs.LOGIN_VALIDATE_HTTP, params);
+		
+		CookieStore c = getCookieStore(appContext);
+		if (c != null) {
+			List<Cookie> cookieList = c.getCookies();
+			//
+			for (Cookie cookie : cookieList) {
+				System.out.println("cookie.getName()=====>"
+						+ cookie.getName());
+				if (cookie.getName() == "auth") {
+					System.out.println("return true=====>"
+							+ cookie.getName());
+					return true;
+				}
+			}//
+			if (cookieList.size() == 4) {
+				return true;
 			}
-			sb.deleteCharAt(sb.length()-1);
 		}
-		//得到实体的二进制数据，以便计算长度
-		byte[] entitydata = sb.toString().getBytes();
-		URL url = new URL(path);
-		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-		conn.setRequestMethod("POST");
-		conn.setConnectTimeout(5 * 1000);
-		conn.setDoOutput(true);//如果通过post提交数据，必须设置允许对外输出数据
-		//Content-Type: application/x-www-form-urlencoded
-		//Content-Length: 38
-		//下面的两个属性是必须的
-		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		conn.setRequestProperty("Content-Length", String.valueOf(entitydata.length)); //传递数据的长据
-		OutputStream outStream = conn.getOutputStream();
-		outStream.write(entitydata);
-		//把内存中的数据刷新输送给对方
-		outStream.flush();
-		outStream.close();
-		//获取服务端的响应，200代表成功
-		if(conn.getResponseCode()==200){
-			return true;
-		}
+		
 		return false;
 	}
 	
-	public static String login(AppContext appContext, String username, String pwd) throws AppException, Exception {
+	public static ArrayList<HashMap<String, String>> getTopics(AppContext appContext, String url,
+			ArrayList<HashMap<String, String>> topics) {
+
+			String html = http_get(appContext, url, null);
+			// String html = getHtmlByUrl(url);
+			 Document doc = Jsoup.parse(html);
+			//Document doc = Jsoup.connect(url).get();
+			Elements items = doc.select("div[class=cell item]");
+
+			if (!items.isEmpty() && !topics.isEmpty()) {
+				topics.remove(topics.size() - 1);
+			}
+
+			for (Element item : items) {
+				//System.out.println("item======>" + item.toString());
+				Element titleElement = item.select("span[class=item_title]>a")
+						.get(0);
+				String href = titleElement.attr("href");
+				String id = getMatcher("/t/([\\d]+)", href);
+				String replies = getMatcher("#reply([\\d]+)", href);
+				String title = titleElement.text();
+				Element usernameElement = item.select("td>a").get(0);
+				String href2 = usernameElement.attr("href");
+				String username = getMatcher("/member/([0-9a-zA-Z]+)", href2);
+				Element avatarElement = usernameElement.select("img").get(0);
+				String avatar = avatarElement.attr("src");
+				Element nodeElement = item.select("span[class=small fade]>a")
+						.get(0);
+				String node = nodeElement.text();
+				System.out.println(node);
+
+				// creating new HashMap
+				HashMap<String, String> map = new HashMap<String, String>();
+
+				// adding each child node to HashMap key =>
+				// value
+				map.put(KEY_ID, id);
+				map.put(KEY_TITLE, title);
+				map.put(KEY_USERNAME, username);
+				map.put(KEY_REPLIES, replies);
+				map.put(KEY_AVATAR, avatar);
+				map.put(KEY_NODE, node);
+
+				// adding HashList to ArrayList
+				topics.add(map);
+			}
 		
 
-			String html = http_get(appContext, "http://www.v2ex.com/signin");
-			String once = getHtmlOnce(html);
-			StringBuilder sb = new StringBuilder();
-			sb.append("next=/&u=").append(username).append("&p=").append(pwd).append("&once=").append(once).append("&next=/");
-			System.out.println("send form data======>" + sb.toString());
-			System.out.println("send form data======>" + sb.length());
-			
-			byte[] entitydata = sb.toString().getBytes();
-			String path ="http://www.v2ex.com/signin";
-			URL url = new URL(path);
-			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-			conn.setRequestMethod("POST");
-			conn.setConnectTimeout(5 * 1000);
-			conn.setDoOutput(true);//如果通过post提交数据，必须设置允许对外输出数据
-			//Content-Type: application/x-www-form-urlencoded
-			//Content-Length: 38
-			//下面的两个属性是必须的
-			String cookie = getCookie(appContext);
-			conn.setDoOutput(true);//发送POST请求必须设置允许输出
-		    conn.setUseCaches(false);//不使用Cache
-		    conn.setRequestMethod("POST");         
-		    conn.setRequestProperty("Connection", "Keep-Alive");//维持长连接
-		    conn.setRequestProperty("Charset", "UTF-8");
+		HashMap<String, String> mapMore = new HashMap<String, String>();
 
-		    conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-		    
-			conn.setRequestProperty("Cookie", cookie);
+		mapMore.put(KEY_ID, MainActivity.MORE_TAG);
+		mapMore.put(KEY_TITLE, MainActivity.MORE_TAG);
+		mapMore.put(KEY_USERNAME, MainActivity.MORE_TAG);
+		mapMore.put(KEY_REPLIES, MainActivity.MORE_TAG);
+		mapMore.put(KEY_AVATAR, MainActivity.MORE_TAG);
+		mapMore.put(KEY_NODE, MainActivity.MORE_TAG);
 
-			conn.setRequestProperty("Content-Length", String.valueOf(entitydata.length+4)); //传递数据的长据
-			OutputStream outStream = conn.getOutputStream();
-			outStream.write(entitydata);
-			//把内存中的数据刷新输送给对方
-			outStream.flush();
-			outStream.close();
-			//获取服务端的响应，200代表成功
-			System.out.println("conn.getResponseCode()====>" + conn.getResponseCode());
-			if(conn.getResponseCode()==302){
-				return "true";
-			}
-			return "";
-	
+		// adding HashList to ArrayList
+		topics.add(mapMore);
+
+		return topics;
 	}
 	
-	public static void loginTest(AppContext appContext) throws AppException, Exception {
-		
-
-		String html = http_get(appContext, "http://www.v2ex.com/signin");
-		String once = getHtmlOnce(html);
-		System.out.println("loginText once======>" + once);
-		
-		String cookie = getCookie(appContext);
-		System.out.println("loginText cookie======>" + cookie);
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append("next").append('=').append(URLEncoder.encode("/", "utf-8")).append('&');
-		sb.append("u").append('=').append(URLEncoder.encode("burnex", "utf-8")).append('&'); 
-		sb.append("p").append('=').append(URLEncoder.encode("003491", "utf-8")).append('&'); 
-		sb.append("once").append('=').append(URLEncoder.encode(once, "utf-8")).append('&'); 
-		sb.append("next").append('=').append(URLEncoder.encode("/", "utf-8")); 
-		
-		System.out.println("loginText send form data======>" + sb.toString());
-		System.out.println("loginText send form data======>" + sb.length());
-		
-		byte[] entitydata = sb.toString().getBytes();
-		
-		String path ="http://www.v2ex.com/signin";
-		URL url = new URL(path);
-		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-		conn.setRequestMethod("POST");
-		conn.setConnectTimeout(5 * 1000);
-		conn.setDoOutput(true);//如果通过post提交数据，必须设置允许对外输出数据
-		//Content-Type: application/x-www-form-urlencoded
-		//Content-Length: 38
-		//下面的两个属性是必须的
-
-		conn.setDoOutput(true);//发送POST请求必须设置允许输出
-	    conn.setUseCaches(false);//不使用Cache
-	    conn.setRequestMethod("POST");         
-	    conn.setRequestProperty("Connection", "Keep-Alive");//维持长连接
-	    conn.setRequestProperty("Charset", "UTF-8");
-	    conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");	    
-		//conn.setRequestProperty("Cookie", cookie);
-
-		conn.setRequestProperty("Content-Length", String.valueOf(entitydata.length)); //传递数据的长据
-		OutputStream outStream = conn.getOutputStream();
-		outStream.write(entitydata);
-		//把内存中的数据刷新输送给对方
-		outStream.flush();
-		outStream.close();
-		//获取服务端的响应，200代表成功
-		//System.out.println("conn.getResponseCode()====>" + conn.getResponseCode());
-		int s = conn.getResponseCode();
-		System.out.println("conn.getResponseCode()====>" + Integer.toString(s));
-		if(conn.getResponseCode()==302){
-			System.out.println("loginText 302======>");
-
+	private static String getMatcher(String regex, String source) {
+		String result = "";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(source);
+		while (matcher.find()) {
+			result = matcher.group(1);// 只取第一组
 		}
-
-
-}
-	
+		return result;
+	}
+	*/
 }
 
 

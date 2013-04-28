@@ -16,7 +16,8 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:indeterminateOnly="true" />
+        android:indeterminateOnly="true"
+        android:layout_marginTop="-5dp" />
 
         <RelativeLayout
             android:id="@+id/content_wraper"

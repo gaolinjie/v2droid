@@ -32,8 +32,6 @@ import de.neofonie.mobile.app.android.widget.crouton.Style;
 public class ContentActivity extends Activity {
 	
 	private final static String TAG = "ContentFragment";
-	
-	public static final String SHOW_REPLY = "com.v2ex.v2droid.action.SHOW_REPLY";
 
 	Context mContext;
 	private WebView mRepliesListView = null;
@@ -142,7 +140,7 @@ public class ContentActivity extends Activity {
         		break;
         		
         	case R.id.reply:
-				Intent intent = new Intent(SHOW_REPLY);
+				Intent intent = new Intent(Intents.SHOW_REPLY);
 				intent.putExtra("EXTRA_TOPIC_ID", topicID);
 				startActivity(intent);
                 break;

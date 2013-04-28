@@ -21,13 +21,19 @@ public class AppConfig{
 	
 	public final static String CONF_APP_UNIQUEID = "APP_UNIQUEID";
 	public final static String CONF_COOKIE = "cookie";
+	public final static String CONF_LOGIN = "login";
+	public final static String CONF_USERNAME = "username";
+	public final static String CONF_PASSWORD = "password";
+	
+	public final static String STRING_TRUE = "true";
+	public final static String STRING_FALSE = "false";
 	
 	private Context mContext;
 	private static AppConfig appConfig;
 	
 	public static AppConfig getAppConfig(Context context)
 	{
-		if(appConfig == null){
+		if(appConfig == null) {
 			appConfig = new AppConfig();
 			appConfig.mContext = context;
 		}
@@ -45,6 +51,30 @@ public class AppConfig{
 	
 	public String getCookie(){
 		return get(CONF_COOKIE);
+	}
+	
+	public boolean getLogin(){
+		return (get(CONF_LOGIN)==STRING_TRUE) ? true : false;
+	}
+	
+	public String getUsername(){
+		return get(CONF_USERNAME);
+	}
+	
+	public String getPassword(){
+		return get(CONF_PASSWORD);
+	}
+	
+	public void setLogin(boolean l){
+		set(CONF_LOGIN, l ? STRING_TRUE : STRING_FALSE);
+	}
+	
+	public void setUsername(String u){
+		set(CONF_USERNAME, u);
+	}
+	
+	public void setPassword(String p){
+		set(CONF_PASSWORD, p);
 	}
 
 	

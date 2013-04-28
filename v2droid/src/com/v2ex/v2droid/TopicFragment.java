@@ -25,9 +25,6 @@ import com.actionbarsherlock.view.MenuItem;
 public class TopicFragment extends Fragment {
 	
 	private final static String TAG = "TopicFragment";
-
-	public static final String SHOW_CONTENT = "com.v2ex.v2droid.action.SHOW_CONTENT";
-	public static final String SHOW_NEW= "com.v2ex.v2droid.action.SHOW_NEW";
 	
     static final String KEY_ID = "id";
 	static final String KEY_TITLE = "title";
@@ -111,7 +108,7 @@ public class TopicFragment extends Fragment {
 				} else {
 					String tid = topicList.get(position).get(
 							TopicFragment.KEY_ID);
-					Intent contentIntent = new Intent(SHOW_CONTENT);
+					Intent contentIntent = new Intent(Intents.SHOW_CONTENT);
 					contentIntent.putExtra("EXTRA_TOPIC_ID", tid);
 					getActivity().startActivity(contentIntent);
 					
@@ -143,6 +140,8 @@ public class TopicFragment extends Fragment {
 			} else {
 				url = "http://v2ex.com/recent?p="+recentPageNum;	
 			}
+			//AppContext ac = (AppContext) getActivity().getApplication();
+			//ApiClient.getTopics(ac, url, topicList);
 			HtmlParser.getTopics(url, topicList);
 			return s;
 		}
@@ -183,7 +182,7 @@ public class TopicFragment extends Fragment {
         		break;
         		
         	case R.id.newtopic:
-        		Intent intent = new Intent(SHOW_NEW);
+        		Intent intent = new Intent(Intents.SHOW_NEW);
 				getActivity().startActivity(intent);
                 break;
                 

@@ -9,8 +9,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Date;
 
-import org.apache.commons.httpclient.HttpException;
-
 import android.content.Context;
 import android.os.Environment;
 import android.widget.Toast;
@@ -156,9 +154,6 @@ public class AppException extends Exception {
 	public static AppException network(Exception e) {
 		if(e instanceof UnknownHostException || e instanceof ConnectException){
 			return new AppException(TYPE_NETWORK, 0, e);
-		}
-		else if(e instanceof HttpException){
-			return http(e);
 		}
 		else if(e instanceof SocketException){
 			return socket(e);

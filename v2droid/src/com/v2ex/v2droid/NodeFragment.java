@@ -50,7 +50,7 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 	private Intent intent;
 
 	ArrayList<HashMap<String, String>> nodeList = null;
-	StickyGridHeadersSimpleArrayListAdapter<HashMap<String, String>> nodeAdapter = null;
+	NodeStickyAdapter<HashMap<String, String>> nodeAdapter = null;
 
 	static final String KEY_ID = "id";
 	static final String KEY_HEADER_ID = "header_id";
@@ -161,7 +161,7 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 			}*/
 			new GetDataTask().execute();
 		}
-		nodeAdapter = new StickyGridHeadersSimpleArrayListAdapter<HashMap<String, String>>(
+		nodeAdapter = new NodeStickyAdapter<HashMap<String, String>>(
 				getActivity().getApplicationContext(), nodeList,
 				R.layout.header, R.layout.item);
 		

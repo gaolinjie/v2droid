@@ -31,11 +31,5 @@
 			android:layout_height="wrap_content"
 			android:onClick="setLightTheme"
 			android:text="@string/light" />
-		<NavigationItem
-			android:id="@+id/themePickerMixed"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:onClick="setMixedTheme"
-			android:text="@string/mixed" />
 	</LinearLayout>
 </LinearLayout>

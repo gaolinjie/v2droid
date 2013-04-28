@@ -8,12 +8,12 @@ import org.holoeverywhere.ThemeManager;
 import org.holoeverywhere.app.Fragment;
 import org.holoeverywhere.slidingmenu.SlidingActivity;
 import org.holoeverywhere.slidingmenu.SlidingMenu;
+import org.holoeverywhere.widget.TextView;
 
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -26,13 +26,12 @@ public class MainActivity extends SlidingActivity {
 	public static String TOPIC_ID = null;
 	public static String MORE_TAG;
 
-	public static final String SHOW_LOGIN = "com.v2ex.v2droid.action.SHOW_LOGIN";
-
 	private final class ListNavigationAdapter extends
 			ArrayAdapter<MainNavigationItem> implements OnItemClickListener {
 		private int lastSelectedItem = 0;
 		private int preSelectedItem = -1;
 		private View messageView = null;
+		private TextView usernameView = null;
 
 		public ListNavigationAdapter() {
 			this(new ArrayList<MainNavigationItem>());
@@ -63,6 +62,10 @@ public class MainActivity extends SlidingActivity {
 			if (item.title == R.string.message) {
 				messageView = view.findViewById(R.id.selectionHandler2);
 				setMessageIndicator(15);
+			}
+			
+			if (item.title == R.string.user) {
+				usernameView = (TextView) view.findViewById(R.id.text1);
 			}
 						
 			return view;
@@ -104,9 +107,16 @@ public class MainActivity extends SlidingActivity {
 			}
 			BadgeView badge = new BadgeView(MainActivity.this, messageView);
 			badge.setText(Integer.toString(messageNum));
-	    	badge.setBadgeBackgroundColor(Color.parseColor("#A4C639"));
+	    	badge.setBadgeBackgroundColor(Color.parseColor("#FF4444"));
 	    	badge.setBadgePosition(BadgeView.POSITION_CENTER);
 			badge.show();
+		}
+		
+		public void setUsername(String username) {
+			if (usernameView==null) {
+				return;
+			}
+			usernameView.setText(username);
 		}
 
 	}
@@ -197,15 +207,7 @@ public class MainActivity extends SlidingActivity {
 		ft.commit();
 	}
 
-	public boolean checkIsLogin() {
-		final AppContext ac = (AppContext) getApplication();
-		if (!ac.isLogin()) {
-			Intent intent = new Intent(SHOW_LOGIN);
-			startActivity(intent);
-		}
-
-		return ac.isLogin();
-	}
+	
 
 	public void setDarkTheme(View v) {
 		ThemeManager.restartWithDarkTheme(this);
@@ -215,13 +217,32 @@ public class MainActivity extends SlidingActivity {
 		ThemeManager.restartWithLightTheme(this);
 	}
 
-	public void setMixedTheme(View v) {
-		ThemeManager.restartWithMixedTheme(this);
-	}
-
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
 		adapter.onBackPressed();
 	}
+	
+	public boolean checkIsLogin() {
+		boolean isLogin = AppConfig.getAppConfig((AppContext) getApplication()).getLogin();
+		if (!isLogin) {
+			//Intent intent = new Intent(Intents.SHOW_LOGIN);
+			//startActivity(intent);
+			startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), 1);
+		}
+
+		return isLogin;
+	}
+	
+	public void setUsername(String username) {
+		adapter.setUsername(username);
+	}
+	
+	@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        String username = data.getExtras().getString("username");
+        String messages = data.getExtras().getString("messages");
+        
+        setUsername(username);
+    }
 }

@@ -23,7 +23,7 @@
     <string name="more">More...</string>
     <string name="reply_hint">输入回复</string>
     <string name="reply">回复</string>
-    <string name="user">\@gaolinjie</string>
+    <string name="user">用户</string>
     <string name="favorite">收藏夹</string>
     <string name="setting">设置</string>
     <string name="msg_login_usr_null">请输入用户名</string>
