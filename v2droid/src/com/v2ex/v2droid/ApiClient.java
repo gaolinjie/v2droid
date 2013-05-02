@@ -6,9 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.jsoup.Connection;
@@ -17,6 +21,9 @@ import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import com.loopj.android.http.PersistentCookieStore;
 
 
 
@@ -37,9 +44,6 @@ public class ApiClient {
 	private final static int RETRY_TIME = 1;
 
 	private static String appUserAgent;
-	
-	private static CookieStore cookieStore = null;
-	private static HttpContext cookieContext = null;
 	
 	static final String KEY_ID = "id";
 	static final String KEY_TITLE = "title";
@@ -69,7 +73,30 @@ public class ApiClient {
 	}
 	
 	private static Map<String, String> getCookies(AppContext appContext) {
+		if(mCookies.isEmpty() && appContext.getLogin()) {
+			PersistentCookieStore  pcs = new PersistentCookieStore(appContext);
+			List<Cookie> cookieList = pcs.getCookies();
+			for (Cookie cookie : cookieList) {
+				//cookieStore.addCookie(cookie);
+				mCookies.put(cookie.getName(), cookie.getValue());
+				System.out.println("getCookies=====>"
+						+ cookie.getName());
+			}
+		}
 		return mCookies;
+	}
+	
+	public static void storeCookies(AppContext appContext) {
+		PersistentCookieStore  pcs = new PersistentCookieStore(appContext);
+		Map<String, String> cookies = getCookies(appContext);
+		
+		for (Entry<String, String> cookie : cookies.entrySet()) {
+			Cookie c = new BasicClientCookie2(cookie.getKey(), cookie.getValue());
+			pcs.addCookie(c);
+			System.out.println("storeCookies=====>"
+					+ cookie.getKey());
+
+		}	
 	}
 
 	public static Document get(AppContext appContext, String url, String referrer) throws IOException {
@@ -153,9 +180,94 @@ public class ApiClient {
 		return once;
 	}
 	
+	public static ArrayList<HashMap<String, String>> getTopics(AppContext appContext, Document doc,
+			ArrayList<HashMap<String, String>> topics) {
+		
+			//Document doc = get(appContext, url, URLs.HOST);
+			
+			//getMessageNum(appContext, doc);
+			
+			Elements items = doc.select("div[class=cell item]");
+
+			if (!items.isEmpty() && !topics.isEmpty()) {
+				topics.remove(topics.size() - 1);
+			}
+
+			for (Element item : items) {
+				//System.out.println("item======>" + item.toString());
+				Element titleElement = item.select("span[class=item_title]>a")
+						.get(0);
+				String href = titleElement.attr("href");
+				String id = getMatcher("/t/([\\d]+)", href);
+				String replies = getMatcher("#reply([\\d]+)", href);
+				String title = titleElement.text();
+				Element usernameElement = item.select("td>a").get(0);
+				String href2 = usernameElement.attr("href");
+				String username = getMatcher("/member/([0-9a-zA-Z]+)", href2);
+				Element avatarElement = usernameElement.select("img").get(0);
+				String avatar = avatarElement.attr("src");
+				Element nodeElement = item.select("span[class=small fade]>a")
+						.get(0);
+				String node = nodeElement.text();
+				System.out.println(node);
+
+				// creating new HashMap
+				HashMap<String, String> map = new HashMap<String, String>();
+
+				// adding each child node to HashMap key =>
+				// value
+				map.put(KEY_ID, id);
+				map.put(KEY_TITLE, title);
+				map.put(KEY_USERNAME, username);
+				map.put(KEY_REPLIES, replies);
+				map.put(KEY_AVATAR, avatar);
+				map.put(KEY_NODE, node);
+
+				// adding HashList to ArrayList
+				topics.add(map);
+			}
+		
+
+		HashMap<String, String> mapMore = new HashMap<String, String>();
+
+		mapMore.put(KEY_ID, MainActivity.MORE_TAG);
+		mapMore.put(KEY_TITLE, MainActivity.MORE_TAG);
+		mapMore.put(KEY_USERNAME, MainActivity.MORE_TAG);
+		mapMore.put(KEY_REPLIES, MainActivity.MORE_TAG);
+		mapMore.put(KEY_AVATAR, MainActivity.MORE_TAG);
+		mapMore.put(KEY_NODE, MainActivity.MORE_TAG);
+
+		// adding HashList to ArrayList
+		topics.add(mapMore);
+
+		return topics;
+	}
 	
+	public static String getMatcher(String regex, String source) {
+		String result = "";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(source);
+		while (matcher.find()) {
+			result = matcher.group(1);// 只取第一组
+		}
+		return result;
+	}
 	
-	
+	public static String getMessageNum(AppContext appContext, Document doc) {
+		String messageNum = null;
+		Elements items = doc.select("div#Wrapper")
+				.select("div[class=content]").select("div#Rightbar").select("div[class=box]").select("div[class=inner]");
+		//System.out.println("doc=====>"+ doc.toString());
+		if (!items.isEmpty()) {
+			System.out.println("items.get(0).text()=====>"
+					+ items.get(0).toString());
+			messageNum = getMatcher("[\\d]+", items.get(0).text());
+			appContext.setMessageNum(messageNum);
+			
+		}
+		
+		return messageNum;
+	}	
 	
 	/*
 	 * 
@@ -183,16 +295,7 @@ public class ApiClient {
 		return cookieContext;
 	}
 	
-	public static void storeCookies(AppContext appContext) {
-		PersistentCookieStore  pcs = new PersistentCookieStore(appContext);
-		CookieStore c = getCookieStore(appContext);
-		if (c != null) {
-			List<Cookie> cookieList = c.getCookies();
-			for (Cookie cookie : cookieList) {
-				pcs.addCookie(cookie);
-			}
-		}
-	}
+	
 	
 	private static HttpClient getHttpClient() {        
         HttpClient httpClient = new DefaultHttpClient();

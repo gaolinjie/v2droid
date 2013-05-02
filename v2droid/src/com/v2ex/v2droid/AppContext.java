@@ -14,6 +14,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 
 public class AppContext extends Application {
+	
+	private String mUsername = null;
+	private boolean mIsLogin = false;
+	private String mMessageNum = null;
+	
     static {
         config().setDebugMode(true).setPreferenceImpl(PreferenceImpl.JSON);
         LayoutInflater.remap(WidgetContainer.class);
@@ -53,6 +58,34 @@ public class AppContext extends Application {
 			setProperty(AppConfig.CONF_APP_UNIQUEID, uniqueID);
 		}
 		return uniqueID;
+	}
+	
+	public boolean getLogin() {
+		if (!mIsLogin) {
+			mIsLogin = AppConfig.getAppConfig(this).getLogin();
+		}		
+		return mIsLogin;
+	}
+	
+	public String getUsername() {
+		if (mUsername==null && getLogin()) {
+			mUsername = AppConfig.getAppConfig(this).getUsername();
+		}		
+		return mUsername;
+	}
+	
+	public String getMessageNum() {
+		if (getLogin()) {
+			mMessageNum = AppConfig.getAppConfig(this).getMessageNum();
+		}		
+		return mMessageNum;
+	}
+	
+	public void setMessageNum(String n) {
+		if (n!=null) {
+			AppConfig.getAppConfig(this).setMessageNum(n);
+		}		
+
 	}
 
 }

@@ -24,6 +24,7 @@ public class AppConfig{
 	public final static String CONF_LOGIN = "login";
 	public final static String CONF_USERNAME = "username";
 	public final static String CONF_PASSWORD = "password";
+	public final static String CONF_MSGNUM = "msgnum";
 	
 	public final static String STRING_TRUE = "true";
 	public final static String STRING_FALSE = "false";
@@ -65,6 +66,10 @@ public class AppConfig{
 		return get(CONF_PASSWORD);
 	}
 	
+	public String getMessageNum(){
+		return get(CONF_MSGNUM);
+	}
+	
 	public void setLogin(boolean l){
 		set(CONF_LOGIN, l ? STRING_TRUE : STRING_FALSE);
 	}
@@ -77,75 +82,32 @@ public class AppConfig{
 		set(CONF_PASSWORD, p);
 	}
 
+	public void setMessageNum(String n){
+		set(CONF_MSGNUM, n);
+	}
 	
 	public String get(String key)
 	{
-		Properties props = get();
-		return (props!=null)?props.getProperty(key):null;
+		SharedPreferences pref = getSharedPreferences(mContext); 	  
+		return pref.getString(key, "");
 	}
 	
-	public Properties get() {
-		FileInputStream fis = null;
-		Properties props = new Properties();
-		try{
-			//读取files目录下的config
-			//fis = activity.openFileInput(APP_CONFIG);
-			
-			//读取app_config目录下的config
-			File dirConf = mContext.getDir(APP_CONFIG, Context.MODE_PRIVATE);
-			fis = new FileInputStream(dirConf.getPath() + File.separator + APP_CONFIG);
-			
-			props.load(fis);
-		}catch(Exception e){
-		}finally{
-			try {
-				fis.close();
-			} catch (Exception e) {}
-		}
-		return props;
-	}
-	
-	private void setProps(Properties p) {
-		FileOutputStream fos = null;
-		try{
-			//把config建在files目录下
-			//fos = activity.openFileOutput(APP_CONFIG, Context.MODE_PRIVATE);
-			
-			//把config建在(自定义)app_config的目录下
-			File dirConf = mContext.getDir(APP_CONFIG, Context.MODE_PRIVATE);
-			File conf = new File(dirConf, APP_CONFIG);
-			fos = new FileOutputStream(conf);
-			
-			p.store(fos, null);
-			fos.flush();
-		}catch(Exception e){	
-			e.printStackTrace();
-		}finally{
-			try {
-				fos.close();
-			} catch (Exception e) {}
-		}
-	}
-
-	public void set(Properties ps)
-	{
-		Properties props = get();
-		props.putAll(ps);
-		setProps(props);
-	}
 	
 	public void set(String key,String value)
 	{
-		Properties props = get();
-		props.setProperty(key, value);
-		setProps(props);
+		SharedPreferences pref = getSharedPreferences(mContext); 
+		SharedPreferences.Editor editor = pref.edit();     
+		editor.putString(key, value);   
+		editor.commit();  
 	}
 	
 	public void remove(String...key)
 	{
-		Properties props = get();
+		SharedPreferences pref = getSharedPreferences(mContext); 
+		SharedPreferences.Editor editor = pref.edit();      
+		  
 		for(String k : key)
-			props.remove(k);
-		setProps(props);
+			editor.remove(k);
+		editor.commit();
 	}
 }

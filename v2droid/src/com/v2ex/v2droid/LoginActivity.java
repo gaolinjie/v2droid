@@ -142,11 +142,12 @@ public class LoginActivity extends Activity {
 			
 			try {
 				if (ApiClient.login(ac, username, password)) {
-					//AppConfig.getAppConfig(ac).setLogin(true);
-					//ApiClient.storeCookies(ac);
+					AppConfig.getAppConfig(ac).setLogin(true);
+					AppConfig.getAppConfig(ac).setUsername("@" + username);
+					ApiClient.storeCookies(ac);
 					Intent intent = new Intent();
-	                intent.putExtra("username", username);
-	                intent.putExtra("messages", "3");
+	                intent.putExtra("username", "@" + username);
+	                intent.putExtra("messages", "0");
 
 	                LoginActivity.this.setResult(RESULT_OK, intent);
 					LoginActivity.this.finish();

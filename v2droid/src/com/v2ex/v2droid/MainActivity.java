@@ -61,11 +61,14 @@ public class MainActivity extends SlidingActivity {
 			
 			if (item.title == R.string.message) {
 				messageView = view.findViewById(R.id.selectionHandler2);
-				setMessageIndicator(15);
+				String messageNum = ((AppContext) getApplication()).getMessageNum();
+				setMessageNum(messageNum);
 			}
 			
 			if (item.title == R.string.user) {
-				usernameView = (TextView) view.findViewById(R.id.text1);
+				usernameView = (TextView) view.findViewById(android.R.id.text1);
+				String username = ((AppContext) getApplication()).getUsername();
+				setUsername(username);	
 			}
 						
 			return view;
@@ -101,19 +104,19 @@ public class MainActivity extends SlidingActivity {
 			notifyDataSetInvalidated();
 		}
 		
-		public void setMessageIndicator(int messageNum) {
-			if (messageNum == 0 || messageView==null) {
+		public void setMessageNum(String messageNum) {
+			if (messageView==null || messageNum==null || messageNum == "0") {
 				return;
 			}
 			BadgeView badge = new BadgeView(MainActivity.this, messageView);
-			badge.setText(Integer.toString(messageNum));
+			badge.setText(messageNum);
 	    	badge.setBadgeBackgroundColor(Color.parseColor("#FF4444"));
 	    	badge.setBadgePosition(BadgeView.POSITION_CENTER);
 			badge.show();
 		}
 		
 		public void setUsername(String username) {
-			if (usernameView==null) {
+			if (usernameView==null || username==null) {
 				return;
 			}
 			usernameView.setText(username);
@@ -181,18 +184,6 @@ public class MainActivity extends SlidingActivity {
 		ab.setDisplayHomeAsUpEnabled(true);
 	}
 
-	/*
-	 * @Override public boolean onCreateOptionsMenu(Menu menu) {
-	 * 
-	 * getSupportMenuInflater().inflate(R.menu.main, menu); return true;
-	 * 
-	 * }
-	 * 
-	 * @Override public boolean onOptionsItemSelected(MenuItem item) { switch
-	 * (item.getItemId()) { case android.R.id.home: toggle(); break;
-	 * 
-	 * default: return super.onOptionsItemSelected(item); } return true; }
-	 */
 	public void replaceFragment(Fragment fragment) {
 		replaceFragment(fragment, null);
 	}
@@ -206,8 +197,6 @@ public class MainActivity extends SlidingActivity {
 		}
 		ft.commit();
 	}
-
-	
 
 	public void setDarkTheme(View v) {
 		ThemeManager.restartWithDarkTheme(this);
@@ -224,7 +213,7 @@ public class MainActivity extends SlidingActivity {
 	}
 	
 	public boolean checkIsLogin() {
-		boolean isLogin = AppConfig.getAppConfig((AppContext) getApplication()).getLogin();
+		boolean isLogin = ((AppContext) getApplication()).getLogin();
 		if (!isLogin) {
 			//Intent intent = new Intent(Intents.SHOW_LOGIN);
 			//startActivity(intent);
@@ -234,8 +223,8 @@ public class MainActivity extends SlidingActivity {
 		return isLogin;
 	}
 	
-	public void setUsername(String username) {
-		adapter.setUsername(username);
+	public void setMessageNum(String n) {
+		adapter.setMessageNum(n);
 	}
 	
 	@Override
@@ -243,6 +232,7 @@ public class MainActivity extends SlidingActivity {
         String username = data.getExtras().getString("username");
         String messages = data.getExtras().getString("messages");
         
-        setUsername(username);
+        adapter.setUsername(username);
+        adapter.setMessageNum(messages);
     }
 }

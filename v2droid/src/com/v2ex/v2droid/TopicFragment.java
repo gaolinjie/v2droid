@@ -1,6 +1,7 @@
 
 package com.v2ex.v2droid;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -8,6 +9,7 @@ import org.holoeverywhere.LayoutInflater;
 import org.holoeverywhere.app.Activity;
 import org.holoeverywhere.app.Fragment;
 import org.holoeverywhere.widget.ProgressBar;
+import org.jsoup.nodes.Document;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -140,9 +142,21 @@ public class TopicFragment extends Fragment {
 			} else {
 				url = "http://v2ex.com/recent?p="+recentPageNum;	
 			}
-			//AppContext ac = (AppContext) getActivity().getApplication();
-			//ApiClient.getTopics(ac, url, topicList);
-			HtmlParser.getTopics(url, topicList);
+			AppContext ac = (AppContext) getActivity().getApplication();
+			
+			Document doc;
+			try {
+				doc = ApiClient.get(ac, url, URLs.HOST);
+				ApiClient.getTopics(ac, doc, topicList);
+				String num = ApiClient.getMessageNum(ac, doc);
+				if (num!=null) {
+					((MainActivity)getActivity()).setMessageNum(num);
+				}
+			} catch (IOException e) {
+				
+			}
+			
+
 			return s;
 		}
 
