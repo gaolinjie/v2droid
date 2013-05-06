@@ -9,12 +9,11 @@ import org.holoeverywhere.widget.LinearLayout;
 import org.holoeverywhere.widget.TextView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-
-
 
 public class LazyAdapter extends BaseAdapter {
     
@@ -22,6 +21,7 @@ public class LazyAdapter extends BaseAdapter {
     private ArrayList<HashMap<String, String>> data;
     private static LayoutInflater inflater=null;
     public ImageLoader imageLoader; 
+    String userID;
     
     public LazyAdapter(Activity a, ArrayList<HashMap<String, String>> d) {
         activity = a;
@@ -54,14 +54,14 @@ public class LazyAdapter extends BaseAdapter {
         TextView time = (TextView)vi.findViewById(R.id.time); // node
         ImageView thumb_image=(ImageView)vi.findViewById(R.id.list_image); // thumb image
         TextView more = (TextView)vi.findViewById(R.id.more); // more
-        LinearLayout avatar_layout = (LinearLayout)vi.findViewById(R.id.avatar);
+        LinearLayout avatar_layout = (LinearLayout)vi.findViewById(R.id.avatar);       
         
-        HashMap<String, String> topic = new HashMap<String, String>();
-        topic = data.get(position);
-        
+        final HashMap<String, String> topic = data.get(position);
+           
         if (topic.get(TopicFragment.KEY_ID) != MainActivity.MORE_TAG) {
         	// Setting all values in listview
             title.setText(topic.get(TopicFragment.KEY_TITLE));
+            userID = topic.get(TopicFragment.KEY_USERNAME);
             username.setText(topic.get(TopicFragment.KEY_USERNAME));
             replies.setText(topic.get(TopicFragment.KEY_REPLIES));
             node.setText(topic.get(TopicFragment.KEY_NODE));
@@ -86,6 +86,15 @@ public class LazyAdapter extends BaseAdapter {
             more.setText(topic.get(TopicFragment.KEY_TITLE));
             more.setVisibility(View.VISIBLE);
         }
+        
+        avatar_layout.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	System.out.println("thumb_image.setOnClickListener======>");
+            	Intent intent = new Intent(activity, UserActivity.class);
+				intent.putExtra("EXTRA_USER_ID", topic.get(TopicFragment.KEY_USERNAME));
+				activity.startActivity(intent);  	
+            }
+        });
         
         return vi;
     }

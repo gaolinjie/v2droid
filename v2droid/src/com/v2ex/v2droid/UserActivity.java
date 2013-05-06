@@ -25,7 +25,7 @@ public class UserActivity extends Activity {
 	Context mContext;
 	String userID;
 	
-	private String[] USER_TYPE = new String[] { "主题", "回复" };
+	private String[] USER_TYPE = new String[] { "创建的主题", "最近的回复" };
 
 	UserFragmentAdapter mAdapter;
 	ViewPager mPager;
@@ -89,7 +89,7 @@ public class UserActivity extends Activity {
 
 		@Override
 		public Fragment getItem(int position) {
-			return UserFragment.newInstance(USER_TYPE[position % mCount]);
+			return UserFragment2.newInstance(USER_TYPE[position % mCount]);
 		}
 
 		@Override

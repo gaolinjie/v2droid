@@ -12,7 +12,7 @@
 		android:layout_height="wrap_content"
 		android:padding="3dip"		
         android:layout_alignParentLeft="true"
-        android:background="@drawable/image_bg" 
+        android:background="@drawable/image_selector" 
 	    android:layout_marginRight="5dip">
         
 		<ImageView     

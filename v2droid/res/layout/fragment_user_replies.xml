@@ -1,0 +1,34 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_user_replies"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <LinearLayout
+            android:id="@+id/replies_wraper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dip"
+            android:background="@drawable/rounded_rect"
+            android:orientation="vertical" >
+
+            <WebView
+                android:id="@+id/replies_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dip"
+                android:focusableInTouchMode="true"
+                android:focusable="true"/>
+
+            <TextView
+                android:id="@+id/noreply_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="目前尚无回复"
+                android:textColor="#aeaeaeae"
+                android:textSize="15dip"
+                android:padding="10dip" />
+        </LinearLayout>
+
+</RelativeLayout>

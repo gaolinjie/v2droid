@@ -17,6 +17,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -34,9 +35,15 @@ public class UserFragment extends Fragment {
 	Document doc;
 	int recentPageNum = 1;
 	String userID;
+	String userAvatar = null;
     
     private Intent intent; 
-
+    
+    private WebView mRepliesListView = null;
+    private String mReplies;
+    int recentRepliesPageNum = 1;
+    Document docReplies;
+    
     public static UserFragment getInstance() {
         if (UserFragment.instance == null) {
             return new UserFragment();
@@ -64,11 +71,10 @@ public class UserFragment extends Fragment {
     	View view = null;
     	
     	
-    	if (mContent != "类别") {
+    	if (mContent != "最近的回复") {
     		view = inflater.inflate(R.layout.fragment_user, null);
-
-			
 		} else {
+			view = inflater.inflate(R.layout.fragment_user_replies, null);
 		}
     	
     	return view;
@@ -78,7 +84,7 @@ public class UserFragment extends Fragment {
     public void onViewCreated(View view) {
         super.onViewCreated(view);
         
-        if (mContent != "类别") {
+        if (mContent != "最近的回复") {
         	progressBar = (ProgressBar) view
     				.findViewById(R.id.progress_bar);
             progressBar2 = (ProgressBar) view
@@ -118,11 +124,11 @@ public class UserFragment extends Fragment {
     					getActivity().startActivity(contentIntent);
     				}
     			}
-    		});
-
-			
+    		});			
 		} else {
-
+			mRepliesListView = (WebView) view
+    				.findViewById(R.id.replies_list);
+        	new GetDataTask2().execute();
 		}
     }
     
@@ -142,11 +148,20 @@ public class UserFragment extends Fragment {
 			String url = "http://v2ex.com/member/" + userID + "/topics?p=" + recentPageNum;
 
 			AppContext ac = (AppContext) getActivity().getApplication();
-			
-			//Document doc;
+
 			try {
+				if (userAvatar==null) {
+					String urlAvatar = "http://v2ex.com/member/" + userID;
+					Document docAvatar = ApiClient.get(ac, urlAvatar, URLs.HOST);
+					userAvatar = ApiClient.getUserAvatar(ac, docAvatar);
+					if (userAvatar != null) {
+						userAvatar = userAvatar.replace("large", "normal");
+					} else {
+						userAvatar = "";
+					}					
+				}
 				doc = ApiClient.get(ac, url, URLs.HOST);
-				ApiClient.getUserTopics(ac, doc, topicList);
+				ApiClient.getUserTopics(ac, doc, topicList, userAvatar);
 				
 			} catch (IOException e) {				
 			}
@@ -163,6 +178,42 @@ public class UserFragment extends Fragment {
 
 			progressBar.setVisibility(View.GONE);
 			progressBar2.setVisibility(View.GONE);
+
+			super.onPostExecute(result);
+		}
+	}
+    
+    private class GetDataTask2 extends AsyncTask<Void, Void, String[]> {
+
+		@Override
+		protected String[] doInBackground(Void... params) {
+			String[] s = { "", "" };
+			String url = "http://v2ex.com/member/" + userID + "/replies?p=" + recentRepliesPageNum;
+
+			AppContext ac = (AppContext) getActivity().getApplication();
+
+			try {
+				docReplies = ApiClient.get(ac, url, URLs.HOST);
+				System.out.println("getUserReplies doInBackground======>");
+				System.out.println("docReplies======>"+docReplies.toString());
+				mReplies = ApiClient.getUserReplies(ac, docReplies);
+				
+			} catch (IOException e) {				
+			}
+	
+			return s;
+		}
+
+		@Override
+		protected void onPostExecute(String[] result) {
+			recentRepliesPageNum++;
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("<HTML><HEAD><LINK href=\"mobile.css\" type=\"text/css\" rel=\"stylesheet\"/></HEAD><body>");
+			sb.append(mReplies);
+			sb.append("</body></HTML>");
+			mRepliesListView.loadDataWithBaseURL("file:///android_asset/", sb.toString(), "text/html", "utf-8", null);
+			
 
 			super.onPostExecute(result);
 		}

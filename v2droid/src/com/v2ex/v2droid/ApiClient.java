@@ -59,6 +59,8 @@ public class ApiClient {
 	static final String KEY_NAME = "name";
 	static final String KEY_LINK = "link";
 	
+	static final String KEY_GRAY = "gray";
+	
 	private static Map<String, String> mCookies = new HashMap<String, String>();
 	
 	private static String getUserAgent(AppContext appContext) {
@@ -198,7 +200,7 @@ public class ApiClient {
 				String href = titleElement.attr("href");
 				String id = getMatcher("/t/([\\d]+)", href);
 				String replies = getMatcher("#reply([\\d]+)", href);
-				System.out.println("replies======>" + replies);
+				//System.out.println("replies======>" + replies);
 				String title = titleElement.text();
 				Element usernameElement = item.select("td>a").get(0);
 				String href2 = usernameElement.attr("href");
@@ -208,11 +210,11 @@ public class ApiClient {
 				Element nodeElement = item.select("span[class=small fade]>a")
 						.get(0);
 				String node = nodeElement.text();
-				System.out.println(node);
+				//System.out.println(node);
 				Element timeElement = item.select("span[class=small fade]").get(1);
-				System.out.println("t=>" + timeElement.text());
+				//System.out.println("t=>" + timeElement.text());
 				String time = timeElement.text();
-				System.out.println("time=>" + time);
+				//System.out.println("time=>" + time);
 				/*
 				Elements links = item.select("span[class=small fade]").select("a");
 				String reply = "";
@@ -345,8 +347,8 @@ public class ApiClient {
 	}
 	
 	public static ArrayList<HashMap<String, String>> getUserTopics(AppContext appContext, Document doc,
-			ArrayList<HashMap<String, String>> topics) {
-		
+			ArrayList<HashMap<String, String>> topics, String avatar) {
+			
 			Elements items = doc.select("div[class=cell item]");
 
 			if (!topics.isEmpty()) {
@@ -360,29 +362,26 @@ public class ApiClient {
 				String href = titleElement.attr("href");
 				String id = getMatcher("/t/([\\d]+)", href);
 				String replies = getMatcher("#reply([\\d]+)", href);
-				System.out.println("replies======>" + replies);
+				//System.out.println("replies======>" + replies);
 				String title = titleElement.text();
 				Element usernameElement = item.select("span[class=small fade]").select("a").get(1);
 				String href2 = usernameElement.attr("href");
 				String username = getMatcher("/member/([0-9a-zA-Z]+)", href2);
 				
-				String avatar = "";
 				Element nodeElement = item.select("span[class=small fade]>a")
 						.get(0);
 				String node = nodeElement.text();
-				System.out.println(node);
+				//System.out.println(node);
 				Element timeElement = item.select("span[class=small fade]").get(0);
-				System.out.println("t=>" + timeElement.text());
+				//System.out.println("t=>" + timeElement.text());
 				String time = timeElement.text();
-				System.out.println("time=>" + time);
+				//System.out.println("time=>" + time);
 				String[] s = time.split("\u00a0"); 
 				time = "";
 				for (int i = 4; i < s.length; i++) {  
-					System.out.println(s[i]);  
+					//System.out.println(s[i]);  
 					time += s[i];
 				}
-				//time = s[4] + s[5] + s[6];
-
 
 				// creating new HashMap
 				HashMap<String, String> map = new HashMap<String, String>();
@@ -419,6 +418,90 @@ public class ApiClient {
 		topics.add(mapMore);
 
 		return topics;
+	}
+	
+	public static ArrayList<HashMap<String, String>> getUserReplies(AppContext appContext, Document doc,
+			ArrayList<HashMap<String, String>> replies) {
+		System.out.println("getUserReplies======>");
+			Elements itemsDockArea = doc.select("div[class=dock_area]");
+			Elements itemsInner = doc.select("div[class=reply_content]");
+			System.out.println("itemsDockArea======>"+itemsDockArea.toString());
+			System.out.println("itemsInner======>"+itemsInner.toString());
+
+			if (!replies.isEmpty()) {
+				replies.remove(replies.size() - 1);
+			}
+
+			int i = 0;
+			for (Element item : itemsDockArea) {
+				Element grayElement = item.select("span[class=gray]").get(0);
+				String gray = grayElement.text();
+				
+				Element timeElement = item.select("span[class=fade]").get(0);
+				String time = timeElement.text();
+				
+				Element replyElement = itemsInner.get(i);
+				String reply = replyElement.toString();
+
+				// creating new HashMap
+				HashMap<String, String> map = new HashMap<String, String>();
+
+				// adding each child node to HashMap key =>
+				// value
+				map.put(KEY_GRAY, gray);
+				map.put(KEY_TIME, time);
+				map.put(KEY_REPLY, reply);
+				
+				System.out.println("gray======>" + gray);
+				System.out.println("time======>" + time);
+
+				// adding HashList to ArrayList
+				replies.add(map);
+				i++;
+			}
+			
+		HashMap<String, String> mapMore = new HashMap<String, String>();
+
+		mapMore.put(KEY_GRAY, MainActivity.MORE_TAG);		
+		mapMore.put(KEY_TIME, MainActivity.MORE_TAG);
+		//mapMore.put(KEY_REPLY, MainActivity.MORE_TAG);
+		
+		if (itemsDockArea.isEmpty() && replies.isEmpty()) {
+			mapMore.put(KEY_REPLY, "目前尚未有回复");
+		} else {
+			mapMore.put(KEY_REPLY, MainActivity.MORE_TAG);
+		}
+		
+		// adding HashList to ArrayList
+		replies.add(mapMore);
+
+		return replies;
+	}
+	
+	public static String getUserReplies(AppContext appContext, Document doc) {
+		String replies = null;
+		if (doc!=null) {
+			Elements items = doc.select("div#Wrapper");
+			if (!items.isEmpty()) {
+				replies = items.get(0).toString(); 
+				//System.out.println("getUserAvatar=====>" + replies);
+			}
+		}
+		
+		return replies;
+	}	
+	
+	public static String getUserAvatar(AppContext appContext, Document doc) {
+		String avatar = null;
+		if (doc!=null) {
+			Elements items = doc.select("img[class=avatar]");
+			if (!items.isEmpty()) {
+				avatar = items.get(0).attr("src"); 
+				System.out.println("getUserAvatar=====>" + avatar);
+			}
+		}
+		
+		return avatar;
 	}
 	
 	public static String getMatcher(String regex, String source) {

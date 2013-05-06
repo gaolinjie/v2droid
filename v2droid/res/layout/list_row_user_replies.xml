@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/list_selector" >
+
+    <RelativeLayout
+        android:id="@+id/dock_area"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip" >
+
+        <TextView
+            android:id="@+id/gray"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:textColor="#7b7670"
+            android:textSize="14dip" />
+
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/gray"
+            android:background="@drawable/textview_node"
+            android:textColor="#7b7670"
+            android:textSize="10dip" />
+
+        <LinearLayout
+            android:id="@+id/replies_wraper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/time"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/rounded_rect"
+            android:orientation="vertical" >
+
+            <WebView
+                android:id="@+id/reply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dip"
+                android:focusable="true"
+                android:focusableInTouchMode="true" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/more"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:padding="12dp"
+        android:textColor="#54575a"
+        android:textSize="18dip"
+        android:textStyle="bold"
+        android:typeface="sans"
+        android:visibility="gone" />
+
+</RelativeLayout>
