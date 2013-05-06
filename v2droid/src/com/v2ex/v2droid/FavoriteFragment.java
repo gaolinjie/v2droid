@@ -26,9 +26,9 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-public class TopicFragment extends Fragment {
+public class FavoriteFragment extends Fragment {
 	
-	private final static String TAG = "TopicFragment";
+	private final static String TAG = "FavoriteFragment";
 	
     static final String KEY_ID = "id";
 	static final String KEY_TITLE = "title";
@@ -43,20 +43,20 @@ public class TopicFragment extends Fragment {
 	private ProgressBar progressBar;
 	private ProgressBar progressBar2;
 	
-	int recentPageNum = 0;
+	int recentPageNum = 1;
 
-	private static TopicFragment instance;
+	private static FavoriteFragment instance;
 	Document doc;
 
-    public static TopicFragment getInstance() {
-        if (TopicFragment.instance == null) {
-            return new TopicFragment();
+    public static FavoriteFragment getInstance() {
+        if (FavoriteFragment.instance == null) {
+            return new FavoriteFragment();
         }
-        return TopicFragment.instance;
+        return FavoriteFragment.instance;
     }
 
-    public TopicFragment() {
-    	TopicFragment.instance = this;
+    public FavoriteFragment() {
+    	FavoriteFragment.instance = this;
     }
 
     @Override
@@ -71,7 +71,7 @@ public class TopicFragment extends Fragment {
             Bundle savedInstanceState) {
 
     	View view = null;
-    	view = inflater.inflate(R.layout.fragment_topic, null);
+    	view = inflater.inflate(R.layout.fragment_favorite, null);
 
 		return view;
     }
@@ -117,12 +117,6 @@ public class TopicFragment extends Fragment {
 					Intent contentIntent = new Intent(Intents.SHOW_CONTENT);
 					contentIntent.putExtra("EXTRA_TOPIC_ID", tid);
 					getActivity().startActivity(contentIntent);
-					
-					/*
-					MainActivity.TOPIC_ID = topicList.get(position).get(
-							TopicFragment.KEY_ID);
-					((MainActivity) getSupportActivity()).replaceFragment(ContentFragment.getInstance(),
-							((MainActivity) getSupportActivity()).getResources().getString(R.string.reply));*/
 				}
 			}
 		});
@@ -132,7 +126,7 @@ public class TopicFragment extends Fragment {
     @Override
     public void onResume() {
     	super.onResume();
-    	((MainActivity) getSupportActivity()).getSupportActionBar().setTitle(R.string.topic);	
+    	((MainActivity) getSupportActivity()).getSupportActionBar().setTitle(R.string.favorite);	
     }
     
     private class GetDataTask extends AsyncTask<Void, Void, String[]> {
@@ -140,22 +134,19 @@ public class TopicFragment extends Fragment {
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
-			String url;
-			if (recentPageNum == 0) {
-				url = "http://www.v2ex.com/?tab=all";
-			} else {
-				url = "http://v2ex.com/recent?p="+recentPageNum;	
-			}
+			String url = "http://v2ex.com/my/topics?p="+recentPageNum;	
+
 			AppContext ac = (AppContext) getActivity().getApplication();
 			
 			//Document doc;
 			try {
 				doc = ApiClient.get(ac, url, URLs.HOST);
-				ApiClient.getTopics(ac, doc, topicList);
+				ApiClient.getFavorites(ac, doc, topicList);
 				
-			} catch (IOException e) {				
+			} catch (IOException e) {
+				
 			}
-	
+			
 			return s;
 		}
 
@@ -189,7 +180,7 @@ public class TopicFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(
           Menu menu, MenuInflater inflater) {
-       inflater.inflate(R.menu.fragment_topic, menu);
+       inflater.inflate(R.menu.fragment_favorite, menu);
     }
 
     @Override
@@ -198,11 +189,6 @@ public class TopicFragment extends Fragment {
         	case android.R.id.home:
         		((MainActivity)getActivity()).toggle();
         		break;
-        		
-        	case R.id.newtopic:
-        		Intent intent = new Intent(Intents.SHOW_NEW);
-				getActivity().startActivity(intent);
-                break;
                 
             case R.id.refresh:
             	onRefresh();

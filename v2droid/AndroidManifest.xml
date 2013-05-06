@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="11"
         android:targetSdkVersion="17" />
 
     <application
@@ -76,6 +76,16 @@
             android:label="@string/node" >
             <intent-filter>
                 <action android:name="com.v2ex.v2droid.action.SHOW_NODE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".UserActivity"
+            android:label="@string/user"
+            android:theme="@style/Theme.VPI" >
+            <intent-filter>
+                <action android:name="com.v2ex.v2droid.action.SHOW_USER" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

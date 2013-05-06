@@ -32,6 +32,7 @@ public class MainActivity extends SlidingActivity {
 		private int preSelectedItem = -1;
 		private View messageView = null;
 		private TextView usernameView = null;
+		BadgeView badge = null;
 
 		public ListNavigationAdapter() {
 			this(new ArrayList<MainNavigationItem>());
@@ -61,8 +62,6 @@ public class MainActivity extends SlidingActivity {
 			
 			if (item.title == R.string.message) {
 				messageView = view.findViewById(R.id.selectionHandler2);
-				String messageNum = ((AppContext) getApplication()).getMessageNum();
-				setMessageNum(messageNum);
 			}
 			
 			if (item.title == R.string.user) {
@@ -85,9 +84,13 @@ public class MainActivity extends SlidingActivity {
 
 			MainNavigationItem item = getItem(itemPosition);
 			if (item.title == R.string.user) {
-				if (!checkIsLogin()) {
-					return;
-				}
+				//if (!checkIsLogin()) {
+				//	return;
+				//}
+				Intent intent = new Intent(MainActivity.this, UserActivity.class);
+				intent.putExtra("EXTRA_USER_ID", "gaolinjie");
+				startActivity(intent);
+				return;
 			}
 
 			notifyDataSetInvalidated();
@@ -105,14 +108,25 @@ public class MainActivity extends SlidingActivity {
 		}
 		
 		public void setMessageNum(String messageNum) {
-			if (messageView==null || messageNum==null || messageNum == "0") {
+			System.out.println("setMessageNum");
+			if (messageView==null ) {
+				System.out.println("messageView==null || messageNum==null");
 				return;
 			}
-			BadgeView badge = new BadgeView(MainActivity.this, messageView);
-			badge.setText(messageNum);
-	    	badge.setBadgeBackgroundColor(Color.parseColor("#FF4444"));
-	    	badge.setBadgePosition(BadgeView.POSITION_CENTER);
-			badge.show();
+			
+			if (badge == null) {
+				badge = new BadgeView(MainActivity.this, messageView);
+				badge.setBadgeBackgroundColor(Color.parseColor("#FF4444"));
+		    	badge.setBadgePosition(BadgeView.POSITION_CENTER);
+			}
+			
+			if (messageNum==null) {
+				badge.hide();
+				
+			} else {
+				badge.setText(messageNum);
+		    	badge.show();
+			}
 		}
 		
 		public void setUsername(String username) {
@@ -164,7 +178,7 @@ public class MainActivity extends SlidingActivity {
 		adapter.add(TopicFragment.class, R.string.topic);
 		adapter.add(UserFragment.class, R.string.user);
 		adapter.add(MessageFragment.class, R.string.message);
-		adapter.add(UserFragment.class, R.string.favorite);
+		adapter.add(FavoriteFragment.class, R.string.favorite);
 		adapter.add(NodeFragment.class, R.string.node);
 		adapter.add(UserFragment.class, R.string.setting);
 		adapter.add(AboutFragment.class, R.string.about);
@@ -233,6 +247,6 @@ public class MainActivity extends SlidingActivity {
         String messages = data.getExtras().getString("messages");
         
         adapter.setUsername(username);
-        adapter.setMessageNum(messages);
+        //adapter.setMessageNum(messages);
     }
 }

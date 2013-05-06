@@ -39,7 +39,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/username"
-       android:layout_toRightOf="@id/username"           
+        android:layout_toRightOf="@id/username"           
         android:textColor="#7b7670"
         android:textSize="10dip"
         android:layout_marginLeft="6dip"
@@ -56,6 +56,17 @@
         android:typeface="sans" 
         android:textSize="15dip"
         android:textStyle="bold" />	
+        
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:layout_alignLeft="@id/username"
+        android:layout_marginTop="2dp"
+        android:textColor="#343434"
+        android:textSize="10dip"
+        android:text="2分钟前" />
 
 	<!-- Replies of Topic-->
     <TextView

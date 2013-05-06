@@ -10,6 +10,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
@@ -256,4 +260,23 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 			super.onPostExecute(result);
 		}
 	}
+	
+	@Override
+    public void onCreateOptionsMenu(
+          Menu menu, MenuInflater inflater) {
+       //inflater.inflate(R.menu.fragment_content, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        	case android.R.id.home:
+        		((MainActivity)getActivity()).toggle();
+        		break;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
 }
