@@ -553,6 +553,21 @@ public class ApiClient {
 
 		return messages;
 	}
+	
+	public static String[] getNodes(AppContext appContext, Document doc) {
+		
+		Elements items = doc.select("a[class=item_node]");
+		String[] nodes = new String[items.size()];
+		
+		int i = 0;
+		for (Element item : items) {
+			String node = item.text();
+			nodes[i] = node;
+			i++;
+		}
+
+		return nodes;
+	}
 
 	public static ArrayList<HashMap<String, String>> getMessages(
 			AppContext appContext, Document doc,
