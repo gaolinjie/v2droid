@@ -1,18 +1,18 @@
 
 package com.v2ex.v2droid;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.HashMap;
 
 import org.holoeverywhere.app.Activity;
 import org.holoeverywhere.widget.ProgressBar;
 import org.holoeverywhere.widget.TextView;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,7 +23,6 @@ import android.widget.ImageView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.loopj.android.http.JsonHttpResponseHandler;
 
 import de.neofonie.mobile.app.android.widget.crouton.Crouton;
 import de.neofonie.mobile.app.android.widget.crouton.Style;
@@ -37,27 +36,10 @@ public class ContentActivity extends Activity {
 	private WebView mRepliesListView = null;
 	private RepliesAdapter mRepliesListViewAdapter = null;
 	private ImageView mFavImageView = null;
-	private ArrayList<HashMap<String, String>> mRepliesList = null;
+	private String mReplies = null;
 	public ImageLoader mImageLoader = null;
-	private static Boolean mFlagContentDataDone = false;
-	private static Boolean mFlagRepliesDataDone = false;
 	private static Integer mRepliesCount = 0;
-
-	// Url Suffix
-	private static String URL_SUFFIX_TOPIC = "/api/topics/show.json?id=";
-	private static String URL_SUFFIX_REPLIES = "/api/replies/show.json?topic_id=";
-
-	// JSON Node names
-	private static final String TAG_ID = "id";
-	private static final String TAG_TITLE = "title";
-	private static final String TAG_CONTENT = "content_rendered";
-	private static final String TAG_MEMBER = "member";
-	private static final String TAG_MEMBER_USERNAME = "username";
-	private static final String TAG_MEMBER_AVATAR_NORMAL = "avatar_normal";
-	private static final String TAG_NODE = "node";
-	private static final String TAG_NODE_TITLE = "title";
-	private static final String TAG_THANKS = "thanks";
-	private static final String TAG_MEMBER_AVATAR_MINI = "avatar_mini";
+	View contentView;
 
 	// Replies HashMap Key
 	static final String KEY_ID = "id";
@@ -69,6 +51,18 @@ public class ContentActivity extends Activity {
 	private ProgressBar progressBar;
 	
 	String topicID;
+	
+	TextView title_text;
+	WebView content_text;
+	ImageView thumb_image;
+	TextView info_text;
+	TextView bottom_text;
+	TextView noreplyView;
+	
+	HashMap<String, String> mContent = null;
+	int replyNum;
+	String once;
+	Document docReply;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,16 +79,21 @@ public class ContentActivity extends Activity {
 		Intent intent = getIntent();
 		topicID = intent.getStringExtra("EXTRA_TOPIC_ID");
 		System.out.println("访问[@@@@@" + topicID);
+		
+		if (mReplies==null) {
+			new GetDataTask().execute();
+        }
 
 		mRepliesListView = (WebView) findViewById(R.id.replies_list);
 		mRepliesListView.setVisibility(View.GONE);
+		
+		noreplyView = (TextView) findViewById(R.id.noreply_text);
+		noreplyView.setVisibility(View.GONE);
 
 		// At first, disappear the content and replies view
-		View contentView = findViewById(R.id.content_wraper);
+		contentView = findViewById(R.id.content_wraper);
 		contentView.setVisibility(View.GONE);
-		TextView noreplyView = (TextView) findViewById(R.id.noreply_text);
-		noreplyView.setVisibility(View.GONE);
-		
+			
 		progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 		progressBar.setVisibility(View.VISIBLE);
 
@@ -120,8 +119,11 @@ public class ContentActivity extends Activity {
 		});
 
 		// Setup the content and replies view
-		setupTopicContentUI(topicID);
-		setupTopicRepliesUI(topicID);
+		title_text = (TextView) findViewById(R.id.title);
+		content_text = (WebView) findViewById(R.id.content);
+		thumb_image = (ImageView) findViewById(R.id.user_image);
+		info_text = (TextView) findViewById(R.id.info_text);
+		bottom_text = (TextView) findViewById(R.id.bottom_text);
 	}
 
     @Override
@@ -142,10 +144,12 @@ public class ContentActivity extends Activity {
         	case R.id.reply:
 				Intent intent = new Intent(Intents.SHOW_REPLY);
 				intent.putExtra("EXTRA_TOPIC_ID", topicID);
-				startActivity(intent);
+				intent.putExtra("EXTRA_TOPIC_ONCE", once);
+				startActivityForResult(intent, 1);
                 break;
                 
             case R.id.refresh:
+            	onRefresh();
                 break;
 
             default:
@@ -154,161 +158,115 @@ public class ContentActivity extends Activity {
         return true;
     }
     
-    public void setupTopicContentUI(String topicID) {
-		V2HttpClient.get(URL_SUFFIX_TOPIC + topicID, null,
-				new JsonHttpResponseHandler() {
-					@Override
-					public void onSuccess(JSONArray topics) {
-						progressBar.setVisibility(View.GONE);
-						try {
-							JSONObject topic = topics.getJSONObject(0);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (resultCode)  
+        {  
+        case RESULT_OK:  
+        	String html = data.getExtras().getString("html");
+        	docReply = Jsoup.parse(html);
+        	new GetDataTask2().execute();
 
-							// Storing each json item in variable
-							String id = topic.getString(TAG_ID);
-							String title = topic.getString(TAG_TITLE);
-							String content = topic.getString(TAG_CONTENT);
+            break;  
+        }      
+    }
+    
+    public void onRefresh() {
+    	progressBar.setVisibility(View.VISIBLE);
+    	mRepliesListView.setVisibility(View.GONE);
+    	noreplyView.setVisibility(View.GONE);
+    	contentView.setVisibility(View.GONE);
+    	new GetDataTask().execute();
+    }
+    
+    private class GetDataTask extends AsyncTask<Void, Void, String[]> {
 
-							JSONObject member = topic.getJSONObject(TAG_MEMBER);
-							String member_username = member
-									.getString(TAG_MEMBER_USERNAME);
-							String member_avatar_normal = member
-									.getString(TAG_MEMBER_AVATAR_NORMAL);
+		@Override
+		protected String[] doInBackground(Void... params) {
+			String[] s = { "", "" };
+			String url = "http://v2ex.com/t/" + topicID;
+		
+			AppContext ac = (AppContext) getApplication();
+			
+			Document doc;
+			mContent = new HashMap<String, String>();
+			
+			try {
+				doc = ApiClient.get(ac, url, URLs.HOST);
+				replyNum = ApiClient.getTopic(ac, doc, mContent);
+				
+			} catch (IOException e) {
+				
+			}
+			
+			return s;
+		}
 
-							JSONObject node = topic.getJSONObject(TAG_NODE);
-							String node_title = node.getString(TAG_NODE_TITLE);
+		@Override
+		protected void onPostExecute(String[] result) {
+			updateUI ();
 
-							TextView title_text = (TextView) findViewById(R.id.title);
-							WebView content_text = (WebView) findViewById(R.id.content);
-							ImageView thumb_image = (ImageView) findViewById(R.id.user_image);
-							title_text.setText(title);
-
-							String text = "<html><head>"
-									+ "<style type=\"text/css\">body{color: #63656a }"
-									+ "</style></head>"
-									+ "<body link=\"#C0C0C0\" vlink=\"#808080\" alink=\"#FF0000\">"
-									+ content + "</body></html>";
-							content_text.loadDataWithBaseURL(null, text,
-									"text/html", "UTF-8", null);
-							content_text.getSettings().setLayoutAlgorithm(
-									LayoutAlgorithm.SINGLE_COLUMN);
-
-							mImageLoader.DisplayImage(member_avatar_normal,
-									thumb_image);
-
-							if (id != null) {
-								View contentView = findViewById(R.id.content_wraper);
-								contentView.setVisibility(View.VISIBLE);
-							}
-
-							mFlagContentDataDone = true;
-
-							if (mFlagRepliesDataDone) {
-								TextView noreplyView = (TextView) findViewById(R.id.noreply_text);
-								if (mRepliesCount == 0) {
-									mRepliesListView.setVisibility(View.GONE);
-									noreplyView.setVisibility(View.VISIBLE);
-								} else {
-									mRepliesListView
-											.setVisibility(View.VISIBLE);
-									noreplyView.setVisibility(View.GONE);
-									mRepliesListViewAdapter
-											.notifyDataSetChanged();
-								}
-							}
-							
-							
-
-						} catch (JSONException e) {
-							e.printStackTrace();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				});
+			super.onPostExecute(result);
+		}
 	}
+    
+    private class GetDataTask2 extends AsyncTask<Void, Void, String[]> {
 
-	public void setupTopicRepliesUI(String topicID) {
-		V2HttpClient.get(URL_SUFFIX_REPLIES + topicID, null,
-				new JsonHttpResponseHandler() {
-					@Override
-					public void onSuccess(JSONArray replies) {
-						try {
-							mRepliesCount = replies.length();
+		@Override
+		protected String[] doInBackground(Void... params) {
+			String[] s = { "", "" };
+		
+			AppContext ac = (AppContext) getApplication();
+			
+				replyNum = ApiClient.getTopic(ac, docReply, mContent);
 
-							StringBuilder sb = new StringBuilder();
-							sb.append("<html><head>");
-							sb.append("<style type=\"text/css\">body{color: #63656a }");
-							sb.append("</style></head>");
-							sb.append("<body link=\"#C0C0C0\" vlink=\"#808080\" alink=\"#FF0000\">");
-							sb.append("<table cellpadding=\"5\" cellspacing=\"0\"  width=\"100%\" border=\"0\">");
+			return s;
+		}
 
-							// looping through All Contacts
-							for (int i = 0; i < mRepliesCount; i++) {
-								JSONObject c = replies.getJSONObject(i);
+		@Override
+		protected void onPostExecute(String[] result) {
+			updateUI ();
 
-								// Storing each json item in variable
-								String id = c.getString(TAG_ID);
-								String thanks = c.getString(TAG_THANKS);
-								String content = c.getString(TAG_CONTENT);
-
-								// Member is agin JSON Object
-								JSONObject member = c.getJSONObject(TAG_MEMBER);
-
-								String member_username = member
-										.getString(TAG_MEMBER_USERNAME);
-								String member_avatar_mini = member
-										.getString(TAG_MEMBER_AVATAR_MINI);
-
-								sb.append("<tr>");
-								sb.append("<td width=\"32\" border=\"1\" valign=\"top\" align=\"left\"><img src=");
-								sb.append(member_avatar_mini);
-								sb.append(" Height=32  Width=32 class=\"avatar\" border=\"0\" align=\"center\"auto /></td>");
-								// sb.append("<td width=\"10\" valign=\"top\"></td>");
-								sb.append("<td width=\"auto\" valign=\"top\" align=\"left\">");
-								sb.append("<strong>");
-								sb.append(member_username);
-								sb.append("</strong>");
-								sb.append("<br/>");
-								sb.append("<div class=\"reply_content\">");
-								sb.append(content);
-								sb.append("</div>");
-								sb.append("</td>");
-								sb.append("</tr>");
-
-							}
-							sb.append("</table>");
-							sb.append("</body></html>");
-
-							//System.out.println(sb.toString());
-
-							mRepliesListView.loadDataWithBaseURL(null,
-									sb.toString(), "text/html", "UTF-8", null);
-							mRepliesListView.getSettings().setLayoutAlgorithm(
-									LayoutAlgorithm.SINGLE_COLUMN);
-
-							if (mFlagContentDataDone) {
-								TextView noreplyView = (TextView) findViewById(R.id.noreply_text);
-								if (mRepliesCount == 0) {
-									mRepliesListView.setVisibility(View.GONE);
-									noreplyView.setVisibility(View.VISIBLE);
-								} else {
-									mRepliesListView
-											.setVisibility(View.VISIBLE);
-									noreplyView.setVisibility(View.GONE);
-									mRepliesListViewAdapter
-											.notifyDataSetChanged();
-								}
-							} else {
-								mFlagRepliesDataDone = true;
-							}
-							
-
-						} catch (JSONException e) {
-							e.printStackTrace();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				});
+			super.onPostExecute(result);
+		}
 	}
+    
+    private void updateUI () {
+    	progressBar.setVisibility(View.GONE);
+		
+		once = mContent.get(ApiClient.KEY_ONCE);
+		
+		title_text.setText(mContent.get(ApiClient.KEY_TITLE));
+		info_text.setText(mContent.get(ApiClient.KEY_INFO));
+		bottom_text.setText(mContent.get(ApiClient.KEY_FAVORITE));
+
+		String text = "<html><head>"
+				+ "<style type=\"text/css\">body{color: #63656a }"
+				+ "</style></head>"
+				+ "<body link=\"#C0C0C0\" vlink=\"#808080\" alink=\"#FF0000\">"
+				+ mContent.get(ApiClient.KEY_CONTENT) + "</body></html>";
+		content_text.loadDataWithBaseURL(null, text,
+				"text/html", "UTF-8", null);
+		content_text.getSettings().setLayoutAlgorithm(
+				LayoutAlgorithm.SINGLE_COLUMN);
+
+		mImageLoader.DisplayImage(mContent.get(ApiClient.KEY_AVATAR),
+				thumb_image);
+		contentView.setVisibility(View.VISIBLE);
+
+			if (replyNum==0) {
+				mRepliesListView.setVisibility(View.GONE);
+				noreplyView.setVisibility(View.VISIBLE);
+			} else {
+				mReplies = mContent.get(ApiClient.KEY_REPLIES);
+				mRepliesListView.setVisibility(View.VISIBLE);
+				mRepliesListView.loadDataWithBaseURL(null,
+						mReplies, "text/html", "UTF-8", null);
+				mRepliesListView.getSettings().setLayoutAlgorithm(
+						LayoutAlgorithm.SINGLE_COLUMN);
+				
+				noreplyView.setVisibility(View.GONE);
+				
+			}
+    }
 }

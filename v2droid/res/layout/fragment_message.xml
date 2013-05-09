@@ -1,49 +1,45 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/ScrollView"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_topic"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:scrollbars="vertical" >
-
-    <LinearLayout
-        android:id="@+id/fragment_message"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
-        
-        <ProgressBar
+    android:orientation="vertical" >
+    
+    <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:indeterminateOnly="true"
+        android:layout_alignParentTop="true"
         android:layout_marginTop="-5dp" />
-
-        <LinearLayout
-            android:id="@+id/messages_wraper"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dip"
-            android:background="@drawable/rounded_rect"
-            android:orientation="vertical" >
-
-            <WebView
-                android:id="@+id/messages_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dip"
-                android:focusableInTouchMode="true"
-                android:focusable="true"/>
-
-            <TextView
-                android:id="@+id/nomessage_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="目前尚无任何提醒信息"
-                android:textColor="#aeaeaeae"
-                android:textSize="15dip"
-                android:padding="10dip" />
-        </LinearLayout>
-    </LinearLayout>
-
-</ScrollView>
+    
+    <ListView
+        android:id="@+id/message_list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:cacheColorHint="#00000000"
+        android:divider="#b5b5b5"
+        android:dividerHeight="1dp"
+        android:fadingEdge="none"
+        android:fastScrollEnabled="false"
+        android:footerDividersEnabled="false"
+        android:headerDividersEnabled="false"
+        android:smoothScrollbar="true" />
+    
+    <TextView 
+        android:id="@+id/bottom_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible"  />
+    
+    <ProgressBar
+        android:id="@+id/progress_bar2"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminateOnly="true"
+        android:layout_above="@id/bottom_line"
+        android:layout_marginBottom="-11dp" />
+</RelativeLayout>

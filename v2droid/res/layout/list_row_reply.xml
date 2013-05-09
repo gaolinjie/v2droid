@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/list_selector" >
+
+    <RelativeLayout
+        android:id="@+id/dock_area"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dip" >
+        
+        <LinearLayout android:id="@+id/avatar" 
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:padding="3dip"		
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/image_selector" 
+	    android:layout_marginRight="5dip">
+        
+		<ImageView     
+			android:id="@+id/list_image"   
+	        android:layout_width="34dip"
+	        android:layout_height="34dip" />
+        
+	</LinearLayout>
+
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/avatar"
+            android:layout_toRightOf="@+id/avatar" 
+            android:textColor="#7b7670"
+            android:textSize="14dip" />
+
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/username"
+            android:layout_toRightOf="@id/username"
+            android:layout_marginLeft="5dp"
+            android:textColor="#7b7670"
+            android:textSize="10dip" />
+        
+        <TextView
+            android:id="@+id/floor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@id/username"
+            android:background="@drawable/textview_node"
+            android:textColor="#7b7670"
+            android:textSize="10dip" />
+
+        <LinearLayout
+            android:id="@+id/reply_wraper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/username"
+            android:layout_marginTop="5dp"
+            android:layout_alignLeft="@id/username"
+            android:background="@drawable/rounded_rect"
+            android:orientation="vertical" >
+
+            <WebView
+                android:id="@+id/reply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dip"
+                android:focusable="true"
+                android:focusableInTouchMode="true" />
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

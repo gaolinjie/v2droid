@@ -75,9 +75,8 @@
                     android:id="@+id/info_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="By darcy at 222 天前, 1433 次点击  "
                     android:textColor="#343434"
-                    android:textSize="10dip" />
+                    android:textSize="12dip" />
             </LinearLayout>
 
             <ImageView
@@ -102,21 +101,20 @@
                 android:layout_below="@id/content"
                 android:background="@drawable/rounded_rect_gray"
                 android:orientation="horizontal"
-                android:padding="10dip" >
+                android:padding="8dip" >
 
                 <TextView
                     android:id="@+id/bottom_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
-                    android:text="已有 24 人收藏此主题"
                     android:textColor="#aeaeaeae"
                     android:textSize="15dip" />
 
                 <ImageView
                     android:id="@+id/fav_icon"
-                    android:layout_width="20dip"
-                    android:layout_height="20dip"
+                    android:layout_width="24dip"
+                    android:layout_height="24dip"
                     android:layout_alignParentRight="true"
                     android:src="@drawable/favourite"
                     android:tag="@string/favourite_off" />

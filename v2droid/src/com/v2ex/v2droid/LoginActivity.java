@@ -49,7 +49,7 @@ public class LoginActivity extends Activity {
 	private EditText passwordEdit;
 	private InputMethodManager imm;
 	private ProgressBar progressBar;
-	
+
 	String username;
 	String password;
 
@@ -63,7 +63,7 @@ public class LoginActivity extends Activity {
 
 		usernameEdit = (EditText) findViewById(R.id.username_edit);
 		passwordEdit = (EditText) findViewById(R.id.password_edit);
-		
+
 		progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
 		// 添加登陆按钮监听
@@ -93,71 +93,40 @@ public class LoginActivity extends Activity {
 			}
 
 			System.out.println("onClick=====>");
-			
+
 			new GetDataTask().execute();
 		}
 	}
-/*
-	// 登录验证
-	private void login(final String account, final String pwd) {
-		final Handler handler = new Handler() {
-			public void handleMessage(Message msg) {
-				System.out.println("login handleMessage=====>");
-				if (msg.what == 1) {
-					ApiClient.cleanCookie();
 
-					finish();
-
-				} else if (msg.what == 0) {
-
-					UIHelper.ToastMessage(LoginActivity.this,
-							getString(R.string.msg_login_fail) + msg.obj);
-				} else if (msg.what == -1) {
-				}
-			}
-		};
-		new Thread() {
-			public void run() {
-				System.out.println("login run=====>");
-				Message msg = new Message();
-
-				handler.sendMessage(msg);
-			}
-		}.start();
-	}
-*/
 	private class GetDataTask extends AsyncTask<Void, Void, String[]> {
 
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
-			
-			System.out.println("username=====>"
-					+ username);
-			
-			System.out.println("password=====>"
-					+ password);
-			
+
+			System.out.println("username=====>" + username);
+
+			System.out.println("password=====>" + password);
+
 			AppContext ac = (AppContext) getApplication();
-			
+
 			try {
 				if (ApiClient.login(ac, username, password)) {
 					AppConfig.getAppConfig(ac).setLogin(true);
-					AppConfig.getAppConfig(ac).setUsername("@" + username);
+					AppConfig.getAppConfig(ac).setUsername(username);
 					ApiClient.storeCookies(ac);
 					Intent intent = new Intent();
-	                intent.putExtra("username", "@" + username);
-	                intent.putExtra("messages", "0");
+					intent.putExtra("username", "@" + username);
+					intent.putExtra("messages", "0");
 
-	                LoginActivity.this.setResult(RESULT_OK, intent);
+					LoginActivity.this.setResult(RESULT_OK, intent);
 					LoginActivity.this.finish();
 				}
-				
+
 			} catch (IOException e) {
-				
+
 			}
-					
-			
+
 			return s;
 		}
 
@@ -227,7 +196,7 @@ public class LoginActivity extends Activity {
 			System.out.println("Set-Cookie=====>" + header.getValue());
 		}
 		int statusCode = httpResponse.getStatusLine().getStatusCode();
-		
+
 		System.out.println("Post-Cookie=====>"
 				+ localContext.getAttribute(ClientContext.COOKIE_STORE)
 						.toString());
@@ -257,11 +226,9 @@ public class LoginActivity extends Activity {
 		} finally {
 			httpClient3.getConnectionManager().shutdown();
 		}
-		System.out.println("Get-Cookie=====>"
-				+ cookieStore
-						.toString());
-		
-		PersistentCookieStore  pcs = new PersistentCookieStore(this);
+		System.out.println("Get-Cookie=====>" + cookieStore.toString());
+
+		PersistentCookieStore pcs = new PersistentCookieStore(this);
 		List<Cookie> cookieList = cookieStore.getCookies();
 		for (Cookie cookie : cookieList) {
 			pcs.addCookie(cookie);

@@ -9,11 +9,13 @@ import org.holoeverywhere.app.Fragment;
 import org.holoeverywhere.slidingmenu.SlidingActivity;
 import org.holoeverywhere.slidingmenu.SlidingMenu;
 import org.holoeverywhere.widget.TextView;
+import org.holoeverywhere.widget.Toast;
 
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -59,17 +61,17 @@ public class MainActivity extends SlidingActivity {
 			view.setLabel(item.title);
 			view.setSelectionHandlerVisiblity(lastSelectedItem == position ? View.VISIBLE
 					: View.INVISIBLE);
-			
+
 			if (item.title == R.string.message) {
 				messageView = view.findViewById(R.id.selectionHandler2);
 			}
-			
+
 			if (item.title == R.string.user) {
 				usernameView = (TextView) view.findViewById(android.R.id.text1);
 				String username = ((AppContext) getApplication()).getUsername();
-				setUsername(username);	
+				setUsername(username);
 			}
-						
+
 			return view;
 		}
 
@@ -84,13 +86,15 @@ public class MainActivity extends SlidingActivity {
 
 			MainNavigationItem item = getItem(itemPosition);
 			if (item.title == R.string.user) {
-				//if (!checkIsLogin()) {
-				//	return;
-				//}
-				Intent intent = new Intent(MainActivity.this, UserActivity.class);
-				intent.putExtra("EXTRA_USER_ID", "gaolinjie");
-				startActivity(intent);
-				return;
+				if (!checkIsLogin()) {
+					return;
+				} else {
+					Intent intent = new Intent(MainActivity.this,
+							UserActivity.class);
+					intent.putExtra("EXTRA_USER_ID", getUsername());
+					startActivity(intent);
+					return;
+				}
 			}
 
 			notifyDataSetInvalidated();
@@ -106,31 +110,31 @@ public class MainActivity extends SlidingActivity {
 			lastSelectedItem = preSelectedItem;
 			notifyDataSetInvalidated();
 		}
-		
+
 		public void setMessageNum(String messageNum) {
 			System.out.println("setMessageNum");
-			if (messageView==null ) {
+			if (messageView == null) {
 				System.out.println("messageView==null || messageNum==null");
 				return;
 			}
-			
+
 			if (badge == null) {
 				badge = new BadgeView(MainActivity.this, messageView);
 				badge.setBadgeBackgroundColor(Color.parseColor("#FF4444"));
-		    	badge.setBadgePosition(BadgeView.POSITION_CENTER);
+				badge.setBadgePosition(BadgeView.POSITION_CENTER);
 			}
-			
-			if (messageNum==null) {
+
+			if (messageNum == null) {
 				badge.hide();
-				
+
 			} else {
 				badge.setText(messageNum);
-		    	badge.show();
+				badge.show();
 			}
 		}
-		
+
 		public void setUsername(String username) {
-			if (usernameView==null || username==null) {
+			if (usernameView == null || username == null) {
 				return;
 			}
 			usernameView.setText(username);
@@ -225,28 +229,55 @@ public class MainActivity extends SlidingActivity {
 		super.onBackPressed();
 		adapter.onBackPressed();
 	}
-	
+
 	public boolean checkIsLogin() {
 		boolean isLogin = ((AppContext) getApplication()).getLogin();
 		if (!isLogin) {
-			//Intent intent = new Intent(Intents.SHOW_LOGIN);
-			//startActivity(intent);
-			startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), 1);
+			startActivityForResult(new Intent(MainActivity.this,
+					LoginActivity.class), 1);
 		}
 
 		return isLogin;
 	}
 	
+	public String getUsername() {
+		String username = ((AppContext) getApplication()).getUsername();
+		return username;
+	}
+
 	public void setMessageNum(String n) {
 		adapter.setMessageNum(n);
 	}
-	
+
 	@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String username = data.getExtras().getString("username");
-        String messages = data.getExtras().getString("messages");
-        
-        adapter.setUsername(username);
-        //adapter.setMessageNum(messages);
-    }
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (resultCode) {
+		case RESULT_OK:
+			String username = data.getExtras().getString("username");
+			String messages = data.getExtras().getString("messages");
+
+			adapter.setUsername(username);
+			// adapter.setMessageNum(messages);
+			break;
+		}
+	}
+
+	private long exitTime = 0;
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK
+				&& event.getAction() == KeyEvent.ACTION_DOWN) {
+			if ((System.currentTimeMillis() - exitTime) > 2000) {
+				Toast.makeText(getApplicationContext(), "再按一次后退键退出程序",
+						Toast.LENGTH_SHORT).show();
+				exitTime = System.currentTimeMillis();
+			} else {
+				finish();
+				// System.exit(0);
+			}
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
 }
