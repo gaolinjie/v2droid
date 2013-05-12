@@ -55,30 +55,6 @@ public class UserActivity extends Activity {
 
 
 	}
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-            getSupportMenuInflater().inflate(R.menu.activity_user, menu);
-            return true;
-
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        	case android.R.id.home:
-        		finish();
-        		break;
-                
-            case R.id.refresh:
-                break;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-        return true;
-    }
     
     class UserFragmentAdapter extends FragmentPagerAdapter {
 		private int mCount = USER_TYPE.length;
@@ -89,7 +65,7 @@ public class UserActivity extends Activity {
 
 		@Override
 		public Fragment getItem(int position) {
-			return UserFragment2.newInstance(USER_TYPE[position % mCount]);
+			return UserFragment.newInstance(USER_TYPE[position % mCount]);
 		}
 
 		@Override

@@ -5,15 +5,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
     
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:indeterminateOnly="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="-5dp" />
-    
     <ListView
         android:id="@+id/pull_refresh_list"
         android:layout_width="fill_parent"
@@ -37,7 +28,7 @@
         android:visibility="invisible"  />
     
     <ProgressBar
-        android:id="@+id/progress_bar2"
+        android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

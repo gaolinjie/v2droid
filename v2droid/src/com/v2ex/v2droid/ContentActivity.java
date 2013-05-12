@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.holoeverywhere.app.Activity;
-import org.holoeverywhere.widget.ProgressBar;
 import org.holoeverywhere.widget.TextView;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -48,8 +47,6 @@ public class ContentActivity extends Activity {
 	static final String KEY_USERNAME = "username";
 	static final String KEY_AVATAR = "avatar";
 	
-	private ProgressBar progressBar;
-	
 	String topicID;
 	
 	TextView title_text;
@@ -63,6 +60,8 @@ public class ContentActivity extends Activity {
 	int replyNum;
 	String once;
 	Document docReply;
+	
+	private MenuItem refresh;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -93,9 +92,6 @@ public class ContentActivity extends Activity {
 		// At first, disappear the content and replies view
 		contentView = findViewById(R.id.content_wraper);
 		contentView.setVisibility(View.GONE);
-			
-		progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-		progressBar.setVisibility(View.VISIBLE);
 
 		// Setup the favorite icon
 		mFavImageView = (ImageView) findViewById(R.id.fav_icon);
@@ -128,10 +124,10 @@ public class ContentActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
-            getSupportMenuInflater().inflate(R.menu.fragment_content, menu);
+            getSupportMenuInflater().inflate(R.menu.fragment_content, menu);        
+            refresh = menu.findItem(R.id.refresh);
+            refresh.setActionView(R.layout.refresh);     
             return true;
-
     }
 
     @Override
@@ -149,6 +145,7 @@ public class ContentActivity extends Activity {
                 break;
                 
             case R.id.refresh:
+            	refresh.setActionView(R.layout.refresh);
             	onRefresh();
                 break;
 
@@ -172,10 +169,9 @@ public class ContentActivity extends Activity {
     }
     
     public void onRefresh() {
-    	progressBar.setVisibility(View.VISIBLE);
-    	mRepliesListView.setVisibility(View.GONE);
-    	noreplyView.setVisibility(View.GONE);
-    	contentView.setVisibility(View.GONE);
+    	//mRepliesListView.setVisibility(View.GONE);
+    	//noreplyView.setVisibility(View.GONE);
+    	//contentView.setVisibility(View.GONE);
     	new GetDataTask().execute();
     }
     
@@ -205,6 +201,7 @@ public class ContentActivity extends Activity {
 		@Override
 		protected void onPostExecute(String[] result) {
 			updateUI ();
+			refresh.setActionView(null);
 
 			super.onPostExecute(result);
 		}
@@ -226,15 +223,14 @@ public class ContentActivity extends Activity {
 		@Override
 		protected void onPostExecute(String[] result) {
 			updateUI ();
+			
 
 			super.onPostExecute(result);
 		}
 	}
     
     private void updateUI () {
-    	progressBar.setVisibility(View.GONE);
-		
-		once = mContent.get(ApiClient.KEY_ONCE);
+    	once = mContent.get(ApiClient.KEY_ONCE);
 		
 		title_text.setText(mContent.get(ApiClient.KEY_TITLE));
 		info_text.setText(mContent.get(ApiClient.KEY_INFO));

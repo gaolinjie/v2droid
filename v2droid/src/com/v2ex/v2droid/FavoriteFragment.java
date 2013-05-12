@@ -9,6 +9,7 @@ import org.holoeverywhere.LayoutInflater;
 import org.holoeverywhere.app.Activity;
 import org.holoeverywhere.app.Fragment;
 import org.holoeverywhere.widget.ProgressBar;
+import org.holoeverywhere.widget.Toast;
 import org.jsoup.nodes.Document;
 
 import android.content.Intent;
@@ -39,14 +40,18 @@ public class FavoriteFragment extends Fragment {
 	static final String KEY_TIME = "time";
 	LazyAdapter mAdapter = null;
 	ArrayList<HashMap<String, String>> topicList = null;
+	ArrayList<HashMap<String, String>> tempList = null;
 	private ListView listView;
 	private ProgressBar progressBar;
-	private ProgressBar progressBar2;
 	
 	int recentPageNum = 1;
 
 	private static FavoriteFragment instance;
 	Document doc;
+	private MenuItem refresh;
+    boolean bRefresh = false;
+    boolean bIsLastPage = false;
+   	boolean bNotLoag = false;
 
     public static FavoriteFragment getInstance() {
         if (FavoriteFragment.instance == null) {
@@ -82,18 +87,13 @@ public class FavoriteFragment extends Fragment {
         
         progressBar = (ProgressBar) view
 				.findViewById(R.id.progress_bar);
-        progressBar2 = (ProgressBar) view
-				.findViewById(R.id.progress_bar2);
+        progressBar.setVisibility(View.GONE);
         
         if (topicList==null) {
         	topicList = new ArrayList<HashMap<String, String>>();
+        	tempList = new ArrayList<HashMap<String, String>>();
     		new GetDataTask().execute();
     		mAdapter = new LazyAdapter((Activity)getActivity(), topicList);
-    		progressBar.setVisibility(View.VISIBLE);
-    		progressBar2.setVisibility(View.GONE);
-        } else {
-        	progressBar.setVisibility(View.GONE);
-        	progressBar2.setVisibility(View.GONE);
         }
         
         listView = (ListView) view
@@ -109,7 +109,7 @@ public class FavoriteFragment extends Fragment {
 				if (topicList.get(position).get(
 						TopicFragment.KEY_ID) == MainActivity.MORE_TAG) {
 					
-					progressBar2.setVisibility(View.VISIBLE);
+					progressBar.setVisibility(View.VISIBLE);
 					new GetDataTask().execute();
 				} else {
 					String tid = topicList.get(position).get(
@@ -134,46 +134,69 @@ public class FavoriteFragment extends Fragment {
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
-			String url = "http://v2ex.com/my/topics?p="+recentPageNum;	
-
-			AppContext ac = (AppContext) getActivity().getApplication();
 			
-			//Document doc;
-			try {
-				doc = ApiClient.get(ac, url, URLs.HOST);
-				ApiClient.getFavorites(ac, doc, topicList);
-				
-			} catch (IOException e) {
-				
+			if (!bIsLastPage) {
+				String url = "http://v2ex.com/my/topics?p="+recentPageNum;	
+				AppContext ac = (AppContext) getActivity().getApplication();			
+				tempList.clear();
+				try {
+					doc = ApiClient.get(ac, url, URLs.HOST);
+					ApiClient.getFavorites(ac, doc, tempList);
+					
+				} catch (IOException e) {		
+				}	
+			} else {
+				bNotLoag = true;
 			}
-			
+
 			return s;
 		}
 
 		@Override
 		protected void onPostExecute(String[] result) {
-			if (!topicList.isEmpty()) {
-				mAdapter.notifyDataSetChanged();
-				recentPageNum++;
-			}
-
 			progressBar.setVisibility(View.GONE);
-			progressBar2.setVisibility(View.GONE);
+			if (bNotLoag) {				
+				Toast.makeText(getActivity().getApplicationContext(), "没有更多啦...",
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
 			
-			AppContext ac = (AppContext) getActivity().getApplication();
-			String num = ApiClient.getMessageNum(ac, doc);
-			System.out.println("num=====>" + num);
-			((MainActivity)getActivity()).setMessageNum(num);
+			if (tempList.size() > 1) {
+				if (bRefresh) {
+					topicList.clear();
+					bRefresh = false;
+					if (!listView.isStackFromBottom()) {
+						listView.setStackFromBottom(true);
+					}
+					listView.setStackFromBottom(false);
+				}
+				
+				if (!topicList.isEmpty()) {
+					topicList.remove(topicList.size() - 1);
+				}
+				
+				for (int i=0; i < tempList.size(); i++) {
+					topicList.add(tempList.get(i));
+				}
+				recentPageNum++;
+				mAdapter.notifyDataSetChanged();
+			} else {
+				Toast.makeText(getActivity().getApplicationContext(), "貌似网络不给力啊...",
+						Toast.LENGTH_SHORT).show();
+			}
+			
+			refresh.setActionView(null);
 
 			super.onPostExecute(result);
 		}
 	}
     
     public void onRefresh() {
-    	topicList.clear();
-    	mAdapter.notifyDataSetChanged();
-    	progressBar.setVisibility(View.VISIBLE);
-    	recentPageNum = 0;
+    	refresh.setActionView(R.layout.refresh);
+    	bRefresh = true;
+    	bNotLoag = false;
+		bIsLastPage = false;
+    	recentPageNum = 1;
     	new GetDataTask().execute();
     }
     
@@ -181,6 +204,10 @@ public class FavoriteFragment extends Fragment {
     public void onCreateOptionsMenu(
           Menu menu, MenuInflater inflater) {
        inflater.inflate(R.menu.fragment_favorite, menu);
+       refresh = menu.findItem(R.id.refresh);
+       if (topicList==null || topicList.isEmpty()) {
+    	   refresh.setActionView(R.layout.refresh);
+       }
     }
 
     @Override
@@ -191,6 +218,7 @@ public class FavoriteFragment extends Fragment {
         		break;
                 
             case R.id.refresh:
+            	refresh.setActionView(R.layout.refresh);
             	onRefresh();
                 break;
 

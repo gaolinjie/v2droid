@@ -68,8 +68,11 @@ public class MainActivity extends SlidingActivity {
 
 			if (item.title == R.string.user) {
 				usernameView = (TextView) view.findViewById(android.R.id.text1);
-				String username = "@" + ((AppContext) getApplication()).getUsername();
-				setUsername(username);
+				String username = ((AppContext) getApplication()).getUsername();
+				if (username!=null) {
+					username = "@" + username;
+					setUsername(username);
+				}
 			}
 
 			return view;

@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import org.holoeverywhere.app.Activity;
 import org.holoeverywhere.widget.ProgressBar;
+import org.holoeverywhere.widget.Toast;
+import org.jsoup.nodes.Document;
 
 import android.content.Context;
 import android.content.Intent;
@@ -23,8 +25,6 @@ public class NodeActivity extends Activity {
 
 	private final static String TAG = "ContentFragment";
 
-	
-
 	static final String KEY_ID = "id";
 	static final String KEY_TITLE = "title";
 	static final String KEY_REPLIES = "replies";
@@ -33,15 +33,21 @@ public class NodeActivity extends Activity {
 	static final String KEY_NODE = "node";
 	LazyAdapter mAdapter = null;
 	ArrayList<HashMap<String, String>> topicList = null;
+	ArrayList<HashMap<String, String>> tempList = null;
 	private ListView listView;
 	private ProgressBar progressBar;
-	private ProgressBar progressBar2;
 
 	int recentPageNum = 1;
 	String nodeLink = null;
 	String nodeName = null;
 
 	Context mContext;
+
+	private MenuItem refresh;
+	boolean bRefresh = false;
+	boolean bIsLastPage = false;
+	boolean bNotLoag = false;
+	Document doc;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,21 +62,17 @@ public class NodeActivity extends Activity {
 		Intent intent = getIntent();
 		nodeName = intent.getStringExtra("EXTRA_NODE_NAME");
 		nodeLink = intent.getStringExtra("EXTRA_NODE_LINK");
-		
+
 		getSupportActionBar().setTitle(nodeName);
 
 		progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-		progressBar2 = (ProgressBar) findViewById(R.id.progress_bar2);
+		progressBar.setVisibility(View.GONE);
 
 		if (topicList == null) {
 			topicList = new ArrayList<HashMap<String, String>>();
+			tempList = new ArrayList<HashMap<String, String>>();
 			new GetDataTask().execute();
 			mAdapter = new LazyAdapter(this, topicList);
-			progressBar.setVisibility(View.VISIBLE);
-			progressBar2.setVisibility(View.GONE);
-		} else {
-			progressBar.setVisibility(View.GONE);
-			progressBar2.setVisibility(View.GONE);
 		}
 
 		listView = (ListView) findViewById(R.id.pull_refresh_list);
@@ -84,7 +86,7 @@ public class NodeActivity extends Activity {
 
 				if (topicList.get(position).get(TopicFragment.KEY_ID) == MainActivity.MORE_TAG) {
 
-					progressBar2.setVisibility(View.VISIBLE);
+					progressBar.setVisibility(View.VISIBLE);
 					new GetDataTask().execute();
 				} else {
 					String tid = topicList.get(position).get(
@@ -101,8 +103,10 @@ public class NodeActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 
 		getSupportMenuInflater().inflate(R.menu.fragment_topic, menu);
-		return true;
+		refresh = menu.findItem(R.id.refresh);
+		refresh.setActionView(R.layout.refresh);
 
+		return true;
 	}
 
 	@Override
@@ -118,6 +122,7 @@ public class NodeActivity extends Activity {
 			break;
 
 		case R.id.refresh:
+			refresh.setActionView(R.layout.refresh);
 			onRefresh();
 			break;
 
@@ -128,10 +133,12 @@ public class NodeActivity extends Activity {
 	}
 
 	public void onRefresh() {
-		topicList.clear();
-		mAdapter.notifyDataSetChanged();
-		progressBar.setVisibility(View.VISIBLE);
-		recentPageNum = 0;
+		refresh.setActionView(R.layout.refresh);
+		bRefresh = true;
+		bNotLoag = false;
+		bIsLastPage = false;
+		recentPageNum = 1;
+
 		new GetDataTask().execute();
 	}
 
@@ -140,22 +147,53 @@ public class NodeActivity extends Activity {
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
-			String url = "http://v2ex.com" + nodeLink + "?p=" + recentPageNum;
-			System.out.println("url===> " + url);
+			if (!bIsLastPage) {
+				String url = "http://v2ex.com" + nodeLink + "?p=" + recentPageNum;
+				AppContext ac = (AppContext) getApplication();
+				tempList.clear();
+				bIsLastPage = ApiClient.getNodeTopics(ac, url, nodeName, tempList);
+			} else {
+				bNotLoag = true;
+			}
 
-			HtmlParser.getNodeTopics(url, nodeName, topicList);
 			return s;
 		}
 
 		@Override
 		protected void onPostExecute(String[] result) {
-			if (!topicList.isEmpty()) {
-				mAdapter.notifyDataSetChanged();
+			progressBar.setVisibility(View.GONE);
+			if (bNotLoag) {				
+				Toast.makeText(getApplicationContext(), "没有更多啦...",
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if (tempList.size() > 1) {
+				System.out.println("!tempList.isEmpty()======>");
+				if (bRefresh) {
+					topicList.clear();
+					bRefresh = false;
+					if (!listView.isStackFromBottom()) {
+						listView.setStackFromBottom(true);
+					}
+					listView.setStackFromBottom(false);
+				}
+
+				if (!topicList.isEmpty()) {
+					topicList.remove(topicList.size() - 1);
+				}
+
+				for (int i = 0; i < tempList.size(); i++) {
+					topicList.add(tempList.get(i));
+				}
 				recentPageNum++;
+				mAdapter.notifyDataSetChanged();
+			} else {
+				Toast.makeText(getApplicationContext(), "貌似网络不给力啊...",
+						Toast.LENGTH_SHORT).show();
 			}
 
-			progressBar.setVisibility(View.GONE);
-			progressBar2.setVisibility(View.GONE);
+			refresh.setActionView(null);
 
 			super.onPostExecute(result);
 		}

@@ -10,6 +10,7 @@ import org.holoeverywhere.app.Activity;
 import org.holoeverywhere.app.Fragment;
 import org.holoeverywhere.widget.ProgressBar;
 import org.holoeverywhere.widget.TextView;
+import org.holoeverywhere.widget.Toast;
 import org.jsoup.nodes.Document;
 
 import android.content.Intent;
@@ -31,12 +32,16 @@ public class MessageFragment extends Fragment {
 
     private static MessageFragment instance;
     private ProgressBar progressBar;
-	private ProgressBar progressBar2;
 	ArrayList<HashMap<String, String>> messageList = null;
+	ArrayList<HashMap<String, String>> tempList = null;
     private ListView messageListView;
     MessageAdapter mMessagesAdapter = null;
     int recentPageNum = 1;
     Document doc;
+    private MenuItem refresh;
+    boolean bRefresh = false;
+    boolean bIsLastPage = false;
+	boolean bNotLoag = false;
 
     public static MessageFragment getInstance() {
         if (MessageFragment.instance == null) {
@@ -68,18 +73,14 @@ public class MessageFragment extends Fragment {
 
         progressBar = (ProgressBar) view
 				.findViewById(R.id.progress_bar);
-        progressBar2 = (ProgressBar) view
-				.findViewById(R.id.progress_bar2);
+        progressBar.setVisibility(View.GONE);
 		
         if (messageList==null) {
         	messageList = new ArrayList<HashMap<String, String>>();
+        	tempList = new ArrayList<HashMap<String, String>>();
     		new GetDataTask().execute();
     		mMessagesAdapter = new MessageAdapter((Activity)getActivity(), messageList);
-    		progressBar.setVisibility(View.VISIBLE);
-    		progressBar2.setVisibility(View.GONE);
-        } else {
-        	progressBar.setVisibility(View.GONE);
-        	progressBar2.setVisibility(View.GONE);
+    		progressBar.setVisibility(View.GONE);
         }
         
         messageListView = (ListView) view
@@ -95,7 +96,7 @@ public class MessageFragment extends Fragment {
 				if (messageList.get(position).get(
 						ApiClient.KEY_MESSAGE) == MainActivity.MORE_TAG) {
 					
-					progressBar2.setVisibility(View.VISIBLE);
+					progressBar.setVisibility(View.VISIBLE);
 					new GetDataTask().execute();
 				}
 			}
@@ -105,7 +106,11 @@ public class MessageFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(
           Menu menu, MenuInflater inflater) {
-       //inflater.inflate(R.menu.fragment_content, menu);
+          inflater.inflate(R.menu.fragment_message, menu);
+          refresh = menu.findItem(R.id.refresh);
+          if (messageList==null || messageList.isEmpty()) {
+       	   refresh.setActionView(R.layout.refresh);
+          }
     }
 
     @Override
@@ -114,6 +119,11 @@ public class MessageFragment extends Fragment {
         	case android.R.id.home:
         		((MainActivity)getActivity()).toggle();
         		break;
+        		
+        	case R.id.refresh:
+            	refresh.setActionView(R.layout.refresh);
+            	onRefresh();
+                break;
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -121,38 +131,74 @@ public class MessageFragment extends Fragment {
         return true;
     }
     
+    public void onRefresh() {
+    	refresh.setActionView(R.layout.refresh);
+    	bRefresh = true;
+    	bNotLoag = false;
+		bIsLastPage = false;
+    	recentPageNum = 1;
+    	new GetDataTask().execute();
+    }
+    
     private class GetDataTask extends AsyncTask<Void, Void, String[]> {
 
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
-			String url = "http://v2ex.com/notifications?p=" + recentPageNum;
-		
-			AppContext ac = (AppContext) getActivity().getApplication();
 			
-			Document doc;
-			
-			try {
-				doc = ApiClient.get(ac, url, URLs.HOST);
-				ApiClient.getMessages(ac, doc, messageList);
-				
-			} catch (IOException e) {
-				
+			if (!bIsLastPage) {
+				String url = "http://v2ex.com/notifications?p=" + recentPageNum;
+				AppContext ac = (AppContext) getActivity().getApplication();		
+				Document doc;
+				tempList.clear();	
+				try {
+					doc = ApiClient.get(ac, url, URLs.HOST);
+					bIsLastPage = ApiClient.getMessages(ac, doc, tempList);	
+				} catch (IOException e) {
+					
+				}	
+			} else {
+				bNotLoag = true;
 			}
-			
+	
 			return s;
 		}
 
 		@Override
 		protected void onPostExecute(String[] result) {
-
-			if (!messageList.isEmpty()) {
-				mMessagesAdapter.notifyDataSetChanged();
+			progressBar.setVisibility(View.GONE);
+			if (bNotLoag) {				
+				Toast.makeText(getActivity().getApplicationContext(), "没有更多啦...",
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if (tempList.size() > 1) {
+				System.out.println("!tempList.isEmpty()======>");
+				if (bRefresh) {
+					messageList.clear();
+					bRefresh = false;
+					if (!messageListView.isStackFromBottom()) {
+						messageListView.setStackFromBottom(true);
+					}
+					messageListView.setStackFromBottom(false);
+				}
+				
+				if (!messageList.isEmpty()) {
+					messageList.remove(messageList.size() - 1);
+				}
+				
+				for (int i=0; i < tempList.size(); i++) {
+					messageList.add(tempList.get(i));
+				}
 				recentPageNum++;
+				mMessagesAdapter.notifyDataSetChanged();
+			} else {
+				Toast.makeText(getActivity().getApplicationContext(), "貌似网络不给力啊...",
+						Toast.LENGTH_SHORT).show();
 			}
 
-			progressBar.setVisibility(View.GONE);
-			progressBar2.setVisibility(View.GONE);
+			refresh.setActionView(null);
 
 			super.onPostExecute(result);
 		}

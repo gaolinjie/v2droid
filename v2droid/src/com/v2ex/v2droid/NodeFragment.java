@@ -1,14 +1,17 @@
 package com.v2ex.v2droid;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import org.holoeverywhere.LayoutInflater;
 import org.holoeverywhere.app.Fragment;
+import org.holoeverywhere.widget.Toast;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.nodes.Document;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -54,6 +57,7 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 	private Intent intent;
 
 	ArrayList<HashMap<String, String>> nodeList = null;
+	ArrayList<HashMap<String, String>> tempList = null;
 	NodeStickyAdapter<HashMap<String, String>> nodeAdapter = null;
 
 	static final String KEY_ID = "id";
@@ -64,6 +68,10 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 
 	private SharedPreferences nodePrefs;
 	String storedCollection = null;
+	
+	Document doc;
+	private MenuItem refresh;
+    boolean bRefresh = false;
 
 	public static NodeFragment getInstance() {
 		if (NodeFragment.instance == null) {
@@ -97,9 +105,6 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 	@Override
 	public void onItemClick(AdapterView<?> gridView, View view, int position,
 			long id) {
-		// Notify the active callbacks interface (the activity, if the
-		// fragment is attached to one) that an item has been selected.
-		// mCallbacks.onItemSelected(position);
 		System.out.println("onCreateView===> " + nodeList.get(position).get(KEY_LINK));
 		Intent intent = new Intent(SHOW_NODE);
 		intent.putExtra("EXTRA_NODE_NAME", nodeList.get(position).get(KEY_NAME));
@@ -114,15 +119,6 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 			// Serialize and persist the activated item position.
 			outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
 		}
-		/*
-		if (storedCollection == null && !nodeList.isEmpty()) {
-			System.out.println("onSaveInstanceState===> ");
-			JSONArray result = new JSONArray(nodeList);
-			SharedPreferences.Editor prefEditor = nodePrefs.edit();
-			prefEditor.putString(HOT_NODES, result.toString());
-			prefEditor.commit();
-		}*/
-
 	}
 
 	@Override
@@ -132,37 +128,8 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 
 		if (nodeList == null) {
 			nodeList = new ArrayList<HashMap<String, String>>();
+			tempList = new ArrayList<HashMap<String, String>>();
 			
-/*
-			nodePrefs = getActivity().getApplicationContext()
-					.getSharedPreferences(NODE_PREFS, 0);
-			storedCollection = nodePrefs.getString(HOT_NODES, null);
-
-			if (storedCollection != null) {
-				System.out.println("storedCollection != null===> ");
-				System.out.println("storedCollectionl===> " + storedCollection);
-				try {
-					JSONArray array = new JSONArray(storedCollection);
-					HashMap<String, String> item = null;
-					for (int i = 0; i < array.length(); i++) {
-						String obj = (String) array.get(i);
-						JSONObject ary = new JSONObject(obj);
-						Iterator<String> it = ary.keys();
-						item = new HashMap<String, String>();
-						while (it.hasNext()) {
-							String key = it.next();
-							item.put(key, (String) ary.get(key));
-						}
-						nodeList.add(item);
-					}
-					
-				} catch (JSONException e) {
-					// Log.e(TAG, "while parsing", e);
-				}
-			} else {
-				System.out.println("storedCollection == null===> ");
-				new GetDataTask().execute();
-			}*/
 			new GetDataTask().execute();
 		}
 		nodeAdapter = new NodeStickyAdapter<HashMap<String, String>>(
@@ -176,35 +143,7 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 		mGridView.setAdapter(nodeAdapter);
 		nodeAdapter.notifyDataSetChanged();
 
-		/*
-		 * Currently set in the XML layout, but this is how you would do it in
-		 * your code.
-		 */
-		// mGridView.setColumnWidth((int) calculatePixelsFromDips(100));
-		// mGridView.setNumColumns(StickyGridHeadersGridView.AUTO_FIT);
-		/*
-		 * mGridView.setAdapter(new
-		 * StickyGridHeadersSimpleArrayAdapter<String>(getActivity()
-		 * .getApplicationContext(),
-		 * getResources().getStringArray(R.array.countries), R.layout.header,
-		 * R.layout.item));
-		 */
-
-		/*
-		 * if (savedInstanceState != null) { mFirstVisible =
-		 * savedInstanceState.getInt(KEY_LIST_POSITION); }
-		 */
 		mGridView.setSelection(mFirstVisible);
-		/*
-		 * // Restore the previously serialized activated item position. if
-		 * (savedInstanceState != null &&
-		 * savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
-		 * setActivatedPosition
-		 * (savedInstanceState.getInt(STATE_ACTIVATED_POSITION)); }
-		 */
-
-		// ((StickyGridHeadersGridView)mGridView).setOnHeaderClickListener(this);
-		// ((StickyGridHeadersGridView)mGridView).setOnHeaderLongClickListener(this);
 
 		setHasOptionsMenu(true);
 	}
@@ -215,8 +154,6 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 	 */
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public void setActivateOnItemClick(boolean activateOnItemClick) {
-		// When setting CHOICE_MODE_SINGLE, ListView will automatically
-		// give items the 'activated' state when touched.
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			mGridView
@@ -247,16 +184,43 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
 			String url = "http://www.v2ex.com";
-
-			HtmlParser.getNodes(url, nodeList);
+			
+			AppContext ac = (AppContext) getActivity().getApplication();
+			
+			//Document doc;
+			tempList.clear();
+			try {
+				doc = ApiClient.get(ac, url, URLs.HOST);
+				ApiClient.getNodes(ac, doc, tempList);
+				
+			} catch (IOException e) {	
+			}
 			return s;
 		}
 
 		@Override
 		protected void onPostExecute(String[] result) {
-			if (!nodeList.isEmpty()) {
+			if (!tempList.isEmpty()) {
+				if (bRefresh) {
+					nodeList.clear();
+					bRefresh = false;
+					if (!mGridView.isStackFromBottom()) {
+						mGridView.setStackFromBottom(true);
+					}
+					mGridView.setStackFromBottom(false);
+				}
+				
+				for (int i=0; i < tempList.size(); i++) {
+					nodeList.add(tempList.get(i));
+				}
+
 				nodeAdapter.notifyDataSetChanged();
+			} else {
+				Toast.makeText(getActivity().getApplicationContext(), "貌似网络不给力啊...",
+						Toast.LENGTH_SHORT).show();
 			}
+
+			refresh.setActionView(null);
 			super.onPostExecute(result);
 		}
 	}
@@ -264,7 +228,11 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 	@Override
     public void onCreateOptionsMenu(
           Menu menu, MenuInflater inflater) {
-       //inflater.inflate(R.menu.fragment_content, menu);
+       inflater.inflate(R.menu.fragment_node, menu);
+       refresh = menu.findItem(R.id.refresh);
+       if (nodeList==null || nodeList.isEmpty()) {
+    	   refresh.setActionView(R.layout.refresh);
+       }
     }
 
     @Override
@@ -273,10 +241,21 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
         	case android.R.id.home:
         		((MainActivity)getActivity()).toggle();
         		break;
+        		
+        	case R.id.refresh:
+            	refresh.setActionView(R.layout.refresh);
+            	onRefresh();
+                break;
 
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+    
+    public void onRefresh() {
+    	refresh.setActionView(R.layout.refresh);
+    	bRefresh = true;
+    	new GetDataTask().execute();
     }
 }
