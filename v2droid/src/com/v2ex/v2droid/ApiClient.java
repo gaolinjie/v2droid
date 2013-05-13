@@ -82,7 +82,7 @@ public class ApiClient {
 	}
 
 	private static Map<String, String> getCookies(AppContext appContext) {
-		if (mCookies.isEmpty() && appContext.getLogin()) {
+		if (mCookies.isEmpty() && AppConfig.getLogin(appContext)) {
 			PersistentCookieStore pcs = new PersistentCookieStore(appContext);
 			List<Cookie> cookieList = pcs.getCookies();
 			for (Cookie cookie : cookieList) {
@@ -605,7 +605,7 @@ public class ApiClient {
 			if (!items.isEmpty()) {
 				messageNum = items.get(0).attr("value")
 						.replaceAll("[^0-9]", "");
-				appContext.setMessageNum(messageNum);
+				AppConfig.setMessageNum(appContext, messageNum);
 				System.out.println("messageNum=====>" + messageNum);
 			}
 		}
@@ -623,20 +623,7 @@ public class ApiClient {
 		return messages;
 	}
 
-	public static String[] getNodes(AppContext appContext, Document doc) {
-
-		Elements items = doc.select("a[class=item_node]");
-		String[] nodes = new String[items.size()];
-
-		int i = 0;
-		for (Element item : items) {
-			String node = item.text();
-			nodes[i] = node;
-			i++;
-		}
-
-		return nodes;
-	}
+	
 
 	public static boolean getMessages(
 			AppContext appContext, Document doc,
@@ -820,7 +807,30 @@ public class ApiClient {
 		return replyNum;
 	}
 	
-	public static ArrayList<HashMap<String, String>> getNodes(AppContext appContext, Document doc,
+	public static String[] getAllNodes(AppContext appContext, Document doc,
+			ArrayList<HashMap<String, String>> nodes) {
+
+		    Elements items = doc.select("a[class=item_node]");
+		    String[] nodeArray = new String[items.size()];
+
+		    int i = 0;
+	
+				for (Element item : items) {
+					HashMap<String, String> map = new HashMap<String, String>();
+					map.put(KEY_ID, Integer.toString(i));;
+					map.put(KEY_NAME, item.text());
+					map.put(KEY_LINK, item.attr("href"));
+					nodes.add(map);
+
+					nodeArray[i] = item.text();
+					i++;
+				}
+
+
+		return nodeArray;
+	}
+	
+	public static ArrayList<HashMap<String, String>> getHotNodes(AppContext appContext, Document doc,
 			ArrayList<HashMap<String, String>> nodes) {
 
 			Elements items = doc.select("div#Wrapper")

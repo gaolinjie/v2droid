@@ -59,7 +59,7 @@ public class AppContext extends Application {
 		}
 		return uniqueID;
 	}
-	
+/*	
 	public boolean getLogin() {
 		if (!mIsLogin) {
 			mIsLogin = AppConfig.getAppConfig(this).getLogin();
@@ -86,6 +86,6 @@ public class AppContext extends Application {
 			AppConfig.getAppConfig(this).setMessageNum(n);
 		}		
 
-	}
+	}*/
 
 }

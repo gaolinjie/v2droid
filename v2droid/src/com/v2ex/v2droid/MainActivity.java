@@ -68,7 +68,7 @@ public class MainActivity extends SlidingActivity {
 
 			if (item.title == R.string.user) {
 				usernameView = (TextView) view.findViewById(android.R.id.text1);
-				String username = ((AppContext) getApplication()).getUsername();
+				String username = AppConfig.getUsername(MainActivity.this);
 				if (username!=null) {
 					username = "@" + username;
 					setUsername(username);
@@ -234,7 +234,8 @@ public class MainActivity extends SlidingActivity {
 	}
 
 	public boolean checkIsLogin() {
-		boolean isLogin = ((AppContext) getApplication()).getLogin();
+		boolean isLogin = AppConfig.getLogin(MainActivity.this);
+		System.out.println("checkIsLogin=====>" + isLogin);
 		if (!isLogin) {
 			startActivityForResult(new Intent(MainActivity.this,
 					LoginActivity.class), 1);
@@ -244,7 +245,7 @@ public class MainActivity extends SlidingActivity {
 	}
 	
 	public String getUsername() {
-		String username = ((AppContext) getApplication()).getUsername();
+		String username = AppConfig.getUsername(MainActivity.this);
 		return username;
 	}
 

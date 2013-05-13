@@ -3,24 +3,19 @@ package com.v2ex.v2droid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import org.holoeverywhere.LayoutInflater;
 import org.holoeverywhere.app.Fragment;
 import org.holoeverywhere.widget.Toast;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.jsoup.nodes.Document;
-
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,6 +26,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ListView;
+
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 
 public class NodeFragment extends Fragment implements OnItemClickListener {
 
@@ -116,7 +115,6 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		if (mActivatedPosition != ListView.INVALID_POSITION) {
-			// Serialize and persist the activated item position.
 			outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
 		}
 	}
@@ -183,26 +181,34 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
-			String url = "http://www.v2ex.com";
 			
-			AppContext ac = (AppContext) getActivity().getApplication();
-			
-			//Document doc;
 			tempList.clear();
-			try {
-				doc = ApiClient.get(ac, url, URLs.HOST);
-				ApiClient.getNodes(ac, doc, tempList);
-				
-			} catch (IOException e) {	
+			getHotNodes(tempList);
+			
+			if (bRefresh || tempList.isEmpty()) {
+				String url = "http://www.v2ex.com";
+				AppContext ac = (AppContext) getActivity().getApplication();
+				tempList.clear();
+				try {
+					doc = ApiClient.get(ac, url, URLs.HOST);
+					ApiClient.getHotNodes(ac, doc, tempList);
+					
+					if (!tempList.isEmpty()) {
+						setHotNodes(tempList);
+					}
+					
+				} catch (IOException e) {	
+				}
 			}
+			
 			return s;
 		}
 
 		@Override
 		protected void onPostExecute(String[] result) {
 			if (!tempList.isEmpty()) {
+				nodeList.clear();
 				if (bRefresh) {
-					nodeList.clear();
 					bRefresh = false;
 					if (!mGridView.isStackFromBottom()) {
 						mGridView.setStackFromBottom(true);
@@ -258,4 +264,66 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
     	bRefresh = true;
     	new GetDataTask().execute();
     }
+    
+    public void getHotNodes(ArrayList<HashMap<String, String>> nodes) {
+		DatabaseHelper dbhelper = new DatabaseHelper(getActivity(), AppConfig.DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getReadableDatabase();
+
+		if (db != null) {
+			db.execSQL(
+					  "CREATE TABLE IF NOT EXISTS hot_nodes  ( id TEXT, header_id TEXT, header TEXT, name TEXT, link TEXT );"
+					  );
+			Cursor result = db.rawQuery("SELECT * FROM hot_nodes", null);
+			if (result.getCount() > 0) {
+				result.moveToFirst();
+				while (!result.isAfterLast()) {
+					String id = result.getString(0);
+					String header_id = result.getString(1);
+					String header = result.getString(2);
+					String name = result.getString(3);
+					String link = result.getString(4);
+					
+					HashMap<String, String> map = new HashMap<String, String>();
+					map.put(KEY_ID, id);
+					map.put(KEY_HEADER_ID, header_id);
+					map.put(KEY_HEADER, header);
+					map.put(KEY_NAME, name);
+					map.put(KEY_LINK, link);
+					nodes.add(map);
+					
+					result.moveToNext();
+				}
+			}
+			result.close();
+			db.close();
+		}
+	}
+    
+    public void setHotNodes(ArrayList<HashMap<String, String>> nodes) {
+		String[] s = new String[] {};
+		DatabaseHelper dbhelper = new DatabaseHelper(getActivity(), AppConfig.DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getWritableDatabase();
+
+		if (db != null) {
+			  db.execSQL("DROP TABLE IF EXISTS hot_nodes"); 
+			  db.execSQL(
+			  "CREATE TABLE IF NOT EXISTS hot_nodes  ( id TEXT, header_id TEXT, header TEXT, name TEXT, link TEXT );"
+			  );
+			  
+			  for (int i=0; i<nodes.size(); i++) {
+				  ContentValues values = new ContentValues();   
+		          values.put("id", nodes.get(i).get(ApiClient.KEY_ID));
+		          values.put("header_id", nodes.get(i).get(ApiClient.KEY_HEADER_ID));
+		          values.put("header", nodes.get(i).get(ApiClient.KEY_HEADER));
+		          values.put("name", nodes.get(i).get(ApiClient.KEY_NAME));
+		          values.put("link", nodes.get(i).get(ApiClient.KEY_LINK));
+
+		          db.insert("hot_nodes", null, values);
+			  }
+			  	 
+			db.close();
+		}
+	}
 }

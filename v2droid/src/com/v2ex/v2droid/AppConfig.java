@@ -1,12 +1,10 @@
 package com.v2ex.v2droid;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.util.Properties;
-
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 
 /**
@@ -32,6 +30,8 @@ public class AppConfig{
 	private Context mContext;
 	private static AppConfig appConfig;
 	
+	final public static String DB_NAME = "v2droid.db";
+	
 	public static AppConfig getAppConfig(Context context)
 	{
 		if(appConfig == null) {
@@ -54,36 +54,186 @@ public class AppConfig{
 		return get(CONF_COOKIE);
 	}
 	
-	public boolean getLogin(){
-		return (get(CONF_LOGIN)==STRING_TRUE) ? true : false;
+	public static boolean getLogin(Context context) {
+		DatabaseHelper dbhelper = new DatabaseHelper(context, DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getReadableDatabase();
+
+		int n = 0;
+		if (db != null) {
+			db.execSQL(
+					  "CREATE TABLE IF NOT EXISTS login_table  ( login INTEGER );"
+					  );
+			Cursor result = db.rawQuery("SELECT * FROM login_table", null);
+			if (result.getCount() > 0) {
+				result.moveToFirst();
+				if (!result.isAfterLast()) {
+					n = result.getInt(0);
+					System.out.println("s = result.getString(0);=====>" + n);
+				}
+			}
+			
+			result.close();
+			db.close();
+		}
+		return (n==1) ? true : false;
 	}
 	
-	public String getUsername(){
-		return get(CONF_USERNAME);
+	public static String getUsername(Context context){
+		DatabaseHelper dbhelper = new DatabaseHelper(context, DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getReadableDatabase();
+
+		String s = "";
+		if (db != null) {
+			db.execSQL(
+					  "CREATE TABLE IF NOT EXISTS username_table  ( username TEXT );"
+					  );
+			Cursor result = db.rawQuery("SELECT * FROM username_table", null);
+			if (result.getCount() > 0) {
+				result.moveToFirst();
+				if (!result.isAfterLast()) {
+					s = result.getString(0);
+				}
+			}
+			
+			result.close();
+			db.close();
+		}
+		return s;
 	}
 	
-	public String getPassword(){
-		return get(CONF_PASSWORD);
+	public static String getPassword(Context context){
+		DatabaseHelper dbhelper = new DatabaseHelper(context, DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getReadableDatabase();
+
+		String s = "";
+		if (db != null) {
+			db.execSQL(
+					  "CREATE TABLE IF NOT EXISTS password_table  ( password TEXT );"
+					  );
+			Cursor result = db.rawQuery("SELECT * FROM password_table", null);
+			if (result.getCount() > 0) {
+				result.moveToFirst();
+				if (!result.isAfterLast()) {
+					s = result.getString(0);
+				}
+			}
+			
+			result.close();
+			db.close();
+		}
+		return s;
 	}
 	
-	public String getMessageNum(){
-		return get(CONF_MSGNUM);
+	public static String getMessageNum(Context context){
+		DatabaseHelper dbhelper = new DatabaseHelper(context, DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getReadableDatabase();
+
+		String s = "";
+		if (db != null) {
+			db.execSQL(
+					  "CREATE TABLE IF NOT EXISTS num_table  ( num TEXT );"
+					  ); 
+			Cursor result = db.rawQuery("SELECT * FROM num_table", null);
+			if (result.getCount() > 0) {
+				result.moveToFirst();
+				if (!result.isAfterLast()) {
+					s = result.getString(0);
+				}
+			}
+			
+			result.close();
+			db.close();
+		}
+		return s;
 	}
 	
-	public void setLogin(boolean l){
-		set(CONF_LOGIN, l ? STRING_TRUE : STRING_FALSE);
+	public static void setLogin(Context comtext, boolean l){
+		int n = l ? 1 : 0;
+		DatabaseHelper dbhelper = new DatabaseHelper(comtext, DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getWritableDatabase();
+
+		if (db != null) {
+
+			  db.execSQL("DROP TABLE IF EXISTS login_table"); 
+			  db.execSQL(
+			  "CREATE TABLE IF NOT EXISTS login_table  ( login INTEGER );"
+			  ); 
+			  
+			  ContentValues values = new ContentValues();   
+	            values.put("login", n);  
+  
+	            db.insert("login_table", null, values);
+			 
+			db.close();
+		}
 	}
 	
-	public void setUsername(String u){
-		set(CONF_USERNAME, u);
+	public static void setUsername(Context comtext, String u){
+		DatabaseHelper dbhelper = new DatabaseHelper(comtext, DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getWritableDatabase();
+
+		if (db != null) {
+
+			  db.execSQL("DROP TABLE IF EXISTS username_table"); 
+			  db.execSQL(
+			  "CREATE TABLE IF NOT EXISTS username_table  ( username TEXT );"
+			  ); 
+			  
+			  ContentValues values = new ContentValues();   
+	            values.put("username", u);  
+  
+	            db.insert("username_table", null, values);
+			 
+			db.close();
+		}
 	}
 	
-	public void setPassword(String p){
-		set(CONF_PASSWORD, p);
+	public static void setPassword(Context comtext, String p){
+		DatabaseHelper dbhelper = new DatabaseHelper(comtext, DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getWritableDatabase();
+
+		if (db != null) {
+
+			  db.execSQL("DROP TABLE IF EXISTS password_table"); 
+			  db.execSQL(
+			  "CREATE TABLE IF NOT EXISTS password_table  ( password TEXT );"
+			  ); 
+			  
+			  ContentValues values = new ContentValues();   
+	            values.put("password", p);  
+  
+	            db.insert("password_table", null, values);
+			 
+			db.close();
+		}
 	}
 
-	public void setMessageNum(String n){
-		set(CONF_MSGNUM, n);
+	public static void setMessageNum(Context comtext, String n){
+		DatabaseHelper dbhelper = new DatabaseHelper(comtext, DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getWritableDatabase();
+
+		if (db != null) {
+
+			  db.execSQL("DROP TABLE IF EXISTS num_table"); 
+			  db.execSQL(
+			  "CREATE TABLE IF NOT EXISTS num_table  ( num TEXT );"
+			  ); 
+			  
+			  ContentValues values = new ContentValues();   
+	            values.put("num", n);  
+  
+	            db.insert("num_table", null, values);
+			 
+			db.close();
+		}
 	}
 	
 	public String get(String key)

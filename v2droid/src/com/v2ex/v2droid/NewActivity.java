@@ -1,6 +1,8 @@
 package com.v2ex.v2droid;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.holoeverywhere.ArrayAdapter;
 import org.holoeverywhere.app.Activity;
@@ -8,6 +10,9 @@ import org.holoeverywhere.widget.AutoCompleteTextView;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -22,16 +27,15 @@ public class NewActivity extends Activity {
 	private EditText titleEdit;
 	private EditText contentEdit;
 
-	String nodeID;
+	String link;
 	String title;
 	String content;
 	Response response;
 	
 	ArrayAdapter<String> adapter;
 	
-	private static String[] NODES = new String[] {
-        "Project Babel", "宽带症候群", "云计算", "Dropbox", "设计师"
-    };
+	private static String[] NODES = new String[] {};
+	ArrayList<HashMap<String, String>> nodeList = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,17 +47,12 @@ public class NewActivity extends Activity {
 		
 		 
         nodeEdit = (AutoCompleteTextView)
-                findViewById(R.id.node_edit);
-        
-
-		//nodeEdit = (EditText) findViewById(R.id.node_edit);
-		// /
-		//nodeEdit.setText("问与答"); // this line for temp test
-		nodeID = "qna";
-		// /
+                findViewById(R.id.node_edit);     
 		titleEdit = (EditText) findViewById(R.id.title_edit);
 		contentEdit = (EditText) findViewById(R.id.content_edit);
 		nodeEdit.requestFocus();
+		
+		nodeList = new ArrayList<HashMap<String, String>>();
 		
 		new GetNodeTask().execute();
 	}
@@ -87,7 +86,9 @@ public class NewActivity extends Activity {
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
-			String url = "http://v2ex.com/new/" + nodeID;
+			
+			link = getNodeLinkByName(nodeEdit.getText().toString());
+			String url = "http://v2ex.com/new/" + link;
 
 			title = titleEdit.getText().toString();
 			content = contentEdit.getText().toString();
@@ -110,15 +111,6 @@ public class NewActivity extends Activity {
 		@Override
 		protected void onPostExecute(String[] result) {
 			if (response.statusCode() == 200) {
-				/*
-				 * try { Intent intent = new Intent(); intent.putExtra("html",
-				 * response.parse().toString());
-				 * 
-				 * setResult(RESULT_OK, intent); finish(); } catch (IOException
-				 * e) {
-				 * 
-				 * }
-				 */
 				finish();
 			}
 
@@ -131,32 +123,114 @@ public class NewActivity extends Activity {
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
-			String url = "http://v2ex.com/planes";
-
-			AppContext ac = (AppContext) getApplication();
-
-			Document doc;
-
-			try {
-				doc = ApiClient.get(ac, url, URLs.HOST);
-				NODES = ApiClient.getNodes(ac, doc);
-
-			} catch (IOException e) {
-
+			
+			if (NODES.length == 0) {
+				NODES = getAllNodeNames();
+				if (NODES.length == 0) {
+					String url = "http://v2ex.com/planes";
+					AppContext ac = (AppContext) getApplication();
+					Document doc;
+					try {
+						doc = ApiClient.get(ac, url, URLs.HOST);
+						NODES = ApiClient.getAllNodes(ac, doc, nodeList);
+						
+						if (!nodeList.isEmpty()) {
+							setAllNodes(nodeList);
+						}
+					} catch (IOException e) {
+					}
+				}		
 			}
-
+			
 			return s;
 		}
 
 		@Override
 		protected void onPostExecute(String[] result) {
-			adapter = new ArrayAdapter<String>(NewActivity.this,
-	                android.R.layout.simple_dropdown_item_1line, NODES);
-			nodeEdit.setAdapter(adapter);
+			if (NODES.length > 0) {
+				adapter = new ArrayAdapter<String>(NewActivity.this,
+		                android.R.layout.simple_dropdown_item_1line, NODES);
+				nodeEdit.setAdapter(adapter);
+			}
 			
-			//NodeDB nodeDB = new NodeDB(NewActivity.this);
-
 			super.onPostExecute(result);
+		}
+	}
+	
+	public String[] getAllNodeNames() {
+		String[] s = new String[] {};
+		DatabaseHelper dbhelper = new DatabaseHelper(this, AppConfig.DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getReadableDatabase();
+
+		if (db != null) {
+			db.execSQL(
+					  "CREATE TABLE IF NOT EXISTS all_nodes  ( id TEXT, name TEXT, link TEXT );"
+					  );
+			Cursor result = db.rawQuery("SELECT name FROM all_nodes", null);
+			if (result.getCount() > 0) {
+				int i = 0;
+				s = new String[result.getCount()];
+				result.moveToFirst();
+				while (!result.isAfterLast()) {
+					String name = result.getString(0);
+					s[i] = name;
+					i++;
+					result.moveToNext();
+				}
+			}
+			result.close();
+			db.close();
+		}
+		return s;
+	}
+	
+	public String getNodeLinkByName(String name) {
+		String link = "";
+		DatabaseHelper dbhelper = new DatabaseHelper(this, AppConfig.DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getReadableDatabase();
+
+		if (db != null) {
+			db.execSQL(
+					  "CREATE TABLE IF NOT EXISTS all_nodes  ( id TEXT, name TEXT, link TEXT );"
+					  );
+			Cursor result = db.rawQuery("SELECT link FROM all_nodes where name = ?",
+					new String[] { name });
+			if (result.getCount() > 0) {
+				result.moveToFirst();
+				if (!result.isAfterLast()) {
+					link = result.getString(0);
+				}
+			}
+			result.close();
+			db.close();
+		}
+		return link;
+	}
+	
+	public void setAllNodes(ArrayList<HashMap<String, String>> nodes) {
+		String[] s = new String[] {};
+		DatabaseHelper dbhelper = new DatabaseHelper(this, AppConfig.DB_NAME,
+				null, 1);
+		SQLiteDatabase db = dbhelper.getWritableDatabase();
+
+		if (db != null) {
+			  db.execSQL("DROP TABLE IF EXISTS all_nodes"); 
+			  db.execSQL(
+			  "CREATE TABLE IF NOT EXISTS all_nodes  ( id TEXT, name TEXT, link TEXT );"
+			  );
+			  
+			  for (int i=0; i<nodes.size(); i++) {
+				  ContentValues values = new ContentValues();   
+		          values.put("id", nodes.get(i).get(ApiClient.KEY_ID));
+		          values.put("name", nodes.get(i).get(ApiClient.KEY_NAME));
+		          values.put("link", nodes.get(i).get(ApiClient.KEY_LINK));
+
+		          db.insert("all_nodes", null, values);
+			  }
+			  	 
+			db.close();
 		}
 	}
 }

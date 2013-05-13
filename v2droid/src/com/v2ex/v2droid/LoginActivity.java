@@ -112,8 +112,10 @@ public class LoginActivity extends Activity {
 
 			try {
 				if (ApiClient.login(ac, username, password)) {
-					AppConfig.getAppConfig(ac).setLogin(true);
-					AppConfig.getAppConfig(ac).setUsername(username);
+					//AppConfig.getAppConfig(ac).setLogin(true);
+					//AppConfig.getAppConfig(ac).setUsername(username);
+					AppConfig.setLogin(LoginActivity.this, true);
+					AppConfig.setUsername(LoginActivity.this, username);
 					ApiClient.storeCookies(ac);
 					Intent intent = new Intent();
 					intent.putExtra("username", "@" + username);
