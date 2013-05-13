@@ -93,6 +93,9 @@ public class NodeActivity extends Activity {
 							TopicFragment.KEY_ID);
 					Intent contentIntent = new Intent(Intents.SHOW_CONTENT);
 					contentIntent.putExtra("EXTRA_TOPIC_ID", tid);
+					String node = topicList.get(position).get(
+							TopicFragment.KEY_NODE);
+					contentIntent.putExtra("EXTRA_NODE_NAME", node);
 					startActivity(contentIntent);
 				}
 			}
@@ -148,10 +151,12 @@ public class NodeActivity extends Activity {
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
 			if (!bIsLastPage) {
-				String url = "http://v2ex.com" + nodeLink + "?p=" + recentPageNum;
+				String url = "http://v2ex.com" + nodeLink + "?p="
+						+ recentPageNum;
 				AppContext ac = (AppContext) getApplication();
 				tempList.clear();
-				bIsLastPage = ApiClient.getNodeTopics(ac, url, nodeName, tempList);
+				bIsLastPage = ApiClient.getNodeTopics(ac, url, nodeName,
+						tempList);
 			} else {
 				bNotLoag = true;
 			}
@@ -162,12 +167,12 @@ public class NodeActivity extends Activity {
 		@Override
 		protected void onPostExecute(String[] result) {
 			progressBar.setVisibility(View.GONE);
-			if (bNotLoag) {				
+			if (bNotLoag) {
 				Toast.makeText(getApplicationContext(), "没有更多啦...",
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
-			
+
 			if (tempList.size() > 1) {
 				System.out.println("!tempList.isEmpty()======>");
 				if (bRefresh) {

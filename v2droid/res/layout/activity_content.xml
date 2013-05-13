@@ -15,9 +15,9 @@
             android:id="@+id/content_wraper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/rounded_rect"
+            android:layout_marginBottom="10dip"
             android:layout_marginTop="10dip"
-            android:layout_marginBottom="10dip" >
+            android:background="@drawable/rounded_rect" >
 
             <!-- ListRow Left sied avatar image -->
 
@@ -126,17 +126,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="4dip"
-                android:focusableInTouchMode="true"
-                android:focusable="true"/>
+                android:focusable="true"
+                android:focusableInTouchMode="true" />
 
             <TextView
                 android:id="@+id/noreply_text"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="10dip"
                 android:text="目前尚无回复"
                 android:textColor="#aeaeaeae"
-                android:textSize="15dip"
-                android:padding="10dip" />
+                android:textSize="15dip" />
         </LinearLayout>
     </LinearLayout>
 

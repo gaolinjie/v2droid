@@ -112,16 +112,13 @@ public class LoginActivity extends Activity {
 
 			try {
 				if (ApiClient.login(ac, username, password)) {
-					//AppConfig.getAppConfig(ac).setLogin(true);
-					//AppConfig.getAppConfig(ac).setUsername(username);
 					AppConfig.setLogin(LoginActivity.this, true);
 					AppConfig.setUsername(LoginActivity.this, username);
 					ApiClient.storeCookies(ac);
-					Intent intent = new Intent();
-					intent.putExtra("username", "@" + username);
-					intent.putExtra("messages", "0");
-
-					LoginActivity.this.setResult(RESULT_OK, intent);
+					
+					Intent intent = new Intent(LoginActivity.this, MainActivity.class);					
+					LoginActivity.this.startActivity(intent);
+					
 					LoginActivity.this.finish();
 				}
 
@@ -137,104 +134,5 @@ public class LoginActivity extends Activity {
 
 			super.onPostExecute(result);
 		}
-	}
-
-	public void LoginTest() throws ClientProtocolException, IOException {
-		String html = null;
-		HttpClient httpClient = new DefaultHttpClient();
-		HttpClientParams.setCookiePolicy(httpClient.getParams(),
-				CookiePolicy.BROWSER_COMPATIBILITY);
-
-		CookieStore cookieStore = new BasicCookieStore();
-		HttpContext localContext = new BasicHttpContext();
-		localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
-
-		HttpGet httpget = new HttpGet("http://www.v2ex.com/signin");
-		httpget.setHeader("Connection", "Keep-Alive");
-
-		try {
-			HttpResponse responce = httpClient.execute(httpget, localContext);
-			int resStatu = responce.getStatusLine().getStatusCode();
-			if (resStatu == HttpStatus.SC_OK) {
-				HttpEntity entity = responce.getEntity();
-				if (entity != null) {
-					html = EntityUtils.toString(entity);
-				}
-			}
-		} catch (Exception e) {
-			System.out.println("访问[http://www.v2ex.com/signin出现异常!");
-			e.printStackTrace();
-		} finally {
-			httpClient.getConnectionManager().shutdown();
-		}
-		System.out.println("Get-Cookie=====>"
-				+ localContext.getAttribute(ClientContext.COOKIE_STORE)
-						.toString());
-		String once = HtmlParser.getTopicOnce2(html);
-
-		HttpClient httpClient2 = new DefaultHttpClient();
-
-		HttpClientParams.setCookiePolicy(httpClient2.getParams(),
-				CookiePolicy.BROWSER_COMPATIBILITY);
-		HttpPost post = new HttpPost("http://www.v2ex.com/signin");
-		post.setHeader("Connection", "Keep-Alive");
-		post.setHeader("Referer", "http://v2ex.com/signin");
-
-		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("next", "/"));
-		params.add(new BasicNameValuePair("u", "burnex"));
-		params.add(new BasicNameValuePair("p", "003491"));
-		params.add(new BasicNameValuePair("once", once));
-		params.add(new BasicNameValuePair("next", "/"));
-
-		try {
-			post.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
-		} catch (UnsupportedEncodingException e1) {
-			e1.printStackTrace();
-		}
-		HttpResponse httpResponse = httpClient2.execute(post, localContext);
-		Header header = httpResponse.getFirstHeader("Set-Cookie");
-		if (header != null) {
-			System.out.println("Set-Cookie=====>" + header.getValue());
-		}
-		int statusCode = httpResponse.getStatusLine().getStatusCode();
-
-		System.out.println("Post-Cookie=====>"
-				+ localContext.getAttribute(ClientContext.COOKIE_STORE)
-						.toString());
-
-		HttpClient httpClient3 = new DefaultHttpClient();
-
-		HttpClientParams.setCookiePolicy(httpClient3.getParams(),
-				CookiePolicy.BROWSER_COMPATIBILITY);
-
-		HttpGet httpget3 = new HttpGet("http://www.v2ex.com/");
-		httpget3.setHeader("Connection", "Keep-Alive");
-
-		try {
-			HttpResponse responce3 = httpClient3
-					.execute(httpget3, localContext);
-			int resStatu = responce3.getStatusLine().getStatusCode();
-			if (resStatu == HttpStatus.SC_OK) {
-
-				HttpEntity entity = responce3.getEntity();
-				if (entity != null) {
-					html = EntityUtils.toString(entity);
-					System.out.println("html====>" + html);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			httpClient3.getConnectionManager().shutdown();
-		}
-		System.out.println("Get-Cookie=====>" + cookieStore.toString());
-
-		PersistentCookieStore pcs = new PersistentCookieStore(this);
-		List<Cookie> cookieList = cookieStore.getCookies();
-		for (Cookie cookie : cookieList) {
-			pcs.addCookie(cookie);
-		}
-
 	}
 }

@@ -69,7 +69,7 @@ public class MainActivity extends SlidingActivity {
 			if (item.title == R.string.user) {
 				usernameView = (TextView) view.findViewById(android.R.id.text1);
 				String username = AppConfig.getUsername(MainActivity.this);
-				if (username!=null) {
+				if (username != null) {
 					username = "@" + username;
 					setUsername(username);
 				}
@@ -89,15 +89,11 @@ public class MainActivity extends SlidingActivity {
 
 			MainNavigationItem item = getItem(itemPosition);
 			if (item.title == R.string.user) {
-				if (!checkIsLogin()) {
-					return;
-				} else {
-					Intent intent = new Intent(MainActivity.this,
-							UserActivity.class);
-					intent.putExtra("EXTRA_USER_ID", getUsername());
-					startActivity(intent);
-					return;
-				}
+				Intent intent = new Intent(MainActivity.this,
+						UserActivity.class);
+				intent.putExtra("EXTRA_USER_ID", getUsername());
+				startActivity(intent);
+				return;
 			}
 
 			notifyDataSetInvalidated();
@@ -243,7 +239,7 @@ public class MainActivity extends SlidingActivity {
 
 		return isLogin;
 	}
-	
+
 	public String getUsername() {
 		String username = AppConfig.getUsername(MainActivity.this);
 		return username;

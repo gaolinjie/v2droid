@@ -105,8 +105,11 @@ public class TopicFragment extends Fragment {
 				} else {
 					String tid = topicList.get(position).get(
 							TopicFragment.KEY_ID);
+					String node = topicList.get(position).get(
+							TopicFragment.KEY_NODE);
 					Intent contentIntent = new Intent(Intents.SHOW_CONTENT);
 					contentIntent.putExtra("EXTRA_TOPIC_ID", tid);
+					contentIntent.putExtra("EXTRA_NODE_NAME", node);
 					getActivity().startActivity(contentIntent);
 				}
 			}

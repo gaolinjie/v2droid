@@ -116,6 +116,9 @@ public class FavoriteFragment extends Fragment {
 							TopicFragment.KEY_ID);
 					Intent contentIntent = new Intent(Intents.SHOW_CONTENT);
 					contentIntent.putExtra("EXTRA_TOPIC_ID", tid);
+					String node = topicList.get(position).get(
+							TopicFragment.KEY_NODE);
+					contentIntent.putExtra("EXTRA_NODE_NAME", node);
 					getActivity().startActivity(contentIntent);
 				}
 			}

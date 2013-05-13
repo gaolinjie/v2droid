@@ -19,8 +19,16 @@ public class Splash extends Activity {
 
 			@Override
 			public void run() {
-				Intent mainIntent = new Intent(Splash.this, MainActivity.class);
-				Splash.this.startActivity(mainIntent);
+				boolean isLogin = AppConfig.getLogin(Splash.this);
+				
+				Intent intent;
+				if (isLogin) {
+					intent = new Intent(Splash.this, MainActivity.class);
+				} else {
+					intent = new Intent(Splash.this, LoginActivity.class);
+				}
+				
+				Splash.this.startActivity(intent);
 				Splash.this.finish();
 			}
 

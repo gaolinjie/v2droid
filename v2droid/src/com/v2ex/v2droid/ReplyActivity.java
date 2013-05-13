@@ -4,6 +4,7 @@ package com.v2ex.v2droid;
 import java.io.IOException;
 
 import org.holoeverywhere.app.Activity;
+import org.holoeverywhere.widget.Toast;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
 
@@ -24,6 +25,8 @@ public class ReplyActivity extends Activity {
 	String content;
 	boolean success = false;
 	Response response;
+	
+	private MenuItem refresh;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,7 @@ public class ReplyActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
 
             getSupportMenuInflater().inflate(R.menu.activity_reply, menu);
+            refresh = menu.findItem(R.id.send);
             return true;
     }
 
@@ -58,6 +62,7 @@ public class ReplyActivity extends Activity {
         		break;
                 
             case R.id.send:
+            	refresh.setActionView(R.layout.refresh);
             	new GetDataTask().execute();
             	//finish();
                 break;
@@ -94,7 +99,7 @@ public class ReplyActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(String[] result) {
-			if (response.statusCode() == 200) {
+			if (response!= null && response.statusCode() == 200) {
 				try {
 				Intent intent = new Intent();
                 intent.putExtra("html", response.parse().toString());
@@ -104,7 +109,12 @@ public class ReplyActivity extends Activity {
 				} catch (IOException e) {
 				
 				}
+			} else {
+				Toast.makeText(getApplicationContext(),
+						"对不住啊，好像没发成功...", Toast.LENGTH_SHORT).show();
 			}
+			
+			refresh.setActionView(null);
 
 			super.onPostExecute(result);
 		}

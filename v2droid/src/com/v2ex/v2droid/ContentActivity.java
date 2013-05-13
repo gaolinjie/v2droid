@@ -1,4 +1,3 @@
-
 package com.v2ex.v2droid;
 
 import java.io.IOException;
@@ -18,6 +17,7 @@ import android.view.View.OnClickListener;
 import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebView;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -26,9 +26,8 @@ import com.actionbarsherlock.view.MenuItem;
 import de.neofonie.mobile.app.android.widget.crouton.Crouton;
 import de.neofonie.mobile.app.android.widget.crouton.Style;
 
-
 public class ContentActivity extends Activity {
-	
+
 	private final static String TAG = "ContentFragment";
 
 	Context mContext;
@@ -39,6 +38,7 @@ public class ContentActivity extends Activity {
 	public ImageLoader mImageLoader = null;
 	private static Integer mRepliesCount = 0;
 	View contentView;
+	ScrollView scrollView;  
 
 	// Replies HashMap Key
 	static final String KEY_ID = "id";
@@ -46,21 +46,22 @@ public class ContentActivity extends Activity {
 	static final String KEY_CONTENT = "content_rendered";
 	static final String KEY_USERNAME = "username";
 	static final String KEY_AVATAR = "avatar";
-	
+
 	String topicID;
-	
+	String nodeName;
+
 	TextView title_text;
 	WebView content_text;
 	ImageView thumb_image;
 	TextView info_text;
 	TextView bottom_text;
 	TextView noreplyView;
-	
+
 	HashMap<String, String> mContent = null;
 	int replyNum;
 	String once;
 	Document docReply;
-	
+
 	private MenuItem refresh;
 
 	@Override
@@ -68,24 +69,28 @@ public class ContentActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_content);
 		mContext = this;
-		
+
 		final ActionBar ab = getSupportActionBar();
-        //ab.setTitle(R.string.app_name);
-        ab.setDisplayHomeAsUpEnabled(true);
-        
-        mImageLoader = new ImageLoader(getApplicationContext());
-        
+		// ab.setTitle(R.string.app_name);
+		ab.setDisplayHomeAsUpEnabled(true);
+
+		scrollView = (ScrollView) findViewById(R.id.ScrollView);  
+		
+		mImageLoader = new ImageLoader(getApplicationContext());
+
 		Intent intent = getIntent();
 		topicID = intent.getStringExtra("EXTRA_TOPIC_ID");
+		nodeName = intent.getStringExtra("EXTRA_NODE_NAME");
+		getSupportActionBar().setTitle(nodeName);
 		System.out.println("访问[@@@@@" + topicID);
-		
-		if (mReplies==null) {
+
+		if (mReplies == null) {
 			new GetDataTask().execute();
-        }
+		}
 
 		mRepliesListView = (WebView) findViewById(R.id.replies_list);
 		mRepliesListView.setVisibility(View.GONE);
-		
+
 		noreplyView = (TextView) findViewById(R.id.noreply_text);
 		noreplyView.setVisibility(View.GONE);
 
@@ -102,14 +107,14 @@ public class ContentActivity extends Activity {
 					mFavImageView.setImageResource(R.drawable.favourite_red);
 					mFavImageView.setTag(mContext
 							.getString(R.string.favourite_on));
-					Crouton.makeText((ContentActivity)mContext, R.string.favourite_on,
-							Style.ALERT).show();
+					Crouton.makeText((ContentActivity) mContext,
+							R.string.favourite_on, Style.ALERT).show();
 				} else {
 					mFavImageView.setImageResource(R.drawable.favourite);
 					mFavImageView.setTag(mContext
 							.getString(R.string.favourite_off));
-					Crouton.makeText((ContentActivity)mContext, R.string.favourite_off,
-							Style.CONFIRM).show();
+					Crouton.makeText((ContentActivity) mContext,
+							R.string.favourite_off, Style.CONFIRM).show();
 				}
 			}
 		});
@@ -122,116 +127,112 @@ public class ContentActivity extends Activity {
 		bottom_text = (TextView) findViewById(R.id.bottom_text);
 	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-            getSupportMenuInflater().inflate(R.menu.fragment_content, menu);        
-            refresh = menu.findItem(R.id.refresh);
-            refresh.setActionView(R.layout.refresh);     
-            return true;
-    }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.fragment_content, menu);
+		refresh = menu.findItem(R.id.refresh);
+		refresh.setActionView(R.layout.refresh);
+		return true;
+	}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        	case android.R.id.home:
-        		finish();
-        		break;
-        		
-        	case R.id.reply:
-				Intent intent = new Intent(Intents.SHOW_REPLY);
-				intent.putExtra("EXTRA_TOPIC_ID", topicID);
-				intent.putExtra("EXTRA_TOPIC_ONCE", once);
-				startActivityForResult(intent, 1);
-                break;
-                
-            case R.id.refresh:
-            	refresh.setActionView(R.layout.refresh);
-            	onRefresh();
-                break;
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish();
+			break;
 
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-        return true;
-    }
-    
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (resultCode)  
-        {  
-        case RESULT_OK:  
-        	String html = data.getExtras().getString("html");
-        	docReply = Jsoup.parse(html);
-        	new GetDataTask2().execute();
+		case R.id.reply:
+			Intent intent = new Intent(Intents.SHOW_REPLY);
+			intent.putExtra("EXTRA_TOPIC_ID", topicID);
+			intent.putExtra("EXTRA_TOPIC_ONCE", once);
+			startActivityForResult(intent, 1);
+			break;
 
-            break;  
-        }      
-    }
-    
-    public void onRefresh() {
-    	//mRepliesListView.setVisibility(View.GONE);
-    	//noreplyView.setVisibility(View.GONE);
-    	//contentView.setVisibility(View.GONE);
-    	new GetDataTask().execute();
-    }
-    
-    private class GetDataTask extends AsyncTask<Void, Void, String[]> {
+		case R.id.refresh:
+			refresh.setActionView(R.layout.refresh);
+			onRefresh();
+			break;
+
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+		return true;
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (resultCode) {
+		case RESULT_OK:
+			String html = data.getExtras().getString("html");
+			docReply = Jsoup.parse(html);
+			new GetDataTask2().execute();
+
+			break;
+		}
+	}
+
+	public void onRefresh() {
+		new GetDataTask().execute();
+	}
+
+	private class GetDataTask extends AsyncTask<Void, Void, String[]> {
 
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
 			String url = "http://v2ex.com/t/" + topicID;
-		
+
 			AppContext ac = (AppContext) getApplication();
-			
+
 			Document doc;
 			mContent = new HashMap<String, String>();
-			
+
 			try {
 				doc = ApiClient.get(ac, url, URLs.HOST);
 				replyNum = ApiClient.getTopic(ac, doc, mContent);
-				
+
 			} catch (IOException e) {
-				
+
 			}
-			
+
 			return s;
 		}
 
 		@Override
 		protected void onPostExecute(String[] result) {
-			updateUI ();
+			updateUI();
 			refresh.setActionView(null);
 
 			super.onPostExecute(result);
 		}
 	}
-    
-    private class GetDataTask2 extends AsyncTask<Void, Void, String[]> {
+
+	private class GetDataTask2 extends AsyncTask<Void, Void, String[]> {
 
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
-		
+
 			AppContext ac = (AppContext) getApplication();
-			
-				replyNum = ApiClient.getTopic(ac, docReply, mContent);
+
+			replyNum = ApiClient.getTopic(ac, docReply, mContent);
 
 			return s;
 		}
 
 		@Override
 		protected void onPostExecute(String[] result) {
-			updateUI ();
-			
+			updateUI();
 
 			super.onPostExecute(result);
 		}
 	}
-    
-    private void updateUI () {
-    	once = mContent.get(ApiClient.KEY_ONCE);
-		
+
+	private void updateUI() {
+		scrollView.scrollTo(10, 10);
+		once = mContent.get(ApiClient.KEY_ONCE);
+
 		title_text.setText(mContent.get(ApiClient.KEY_TITLE));
 		info_text.setText(mContent.get(ApiClient.KEY_INFO));
 		bottom_text.setText(mContent.get(ApiClient.KEY_FAVORITE));
@@ -241,8 +242,8 @@ public class ContentActivity extends Activity {
 				+ "</style></head>"
 				+ "<body link=\"#C0C0C0\" vlink=\"#808080\" alink=\"#FF0000\">"
 				+ mContent.get(ApiClient.KEY_CONTENT) + "</body></html>";
-		content_text.loadDataWithBaseURL(null, text,
-				"text/html", "UTF-8", null);
+		content_text
+				.loadDataWithBaseURL(null, text, "text/html", "UTF-8", null);
 		content_text.getSettings().setLayoutAlgorithm(
 				LayoutAlgorithm.SINGLE_COLUMN);
 
@@ -250,19 +251,19 @@ public class ContentActivity extends Activity {
 				thumb_image);
 		contentView.setVisibility(View.VISIBLE);
 
-			if (replyNum==0) {
-				mRepliesListView.setVisibility(View.GONE);
-				noreplyView.setVisibility(View.VISIBLE);
-			} else {
-				mReplies = mContent.get(ApiClient.KEY_REPLIES);
-				mRepliesListView.setVisibility(View.VISIBLE);
-				mRepliesListView.loadDataWithBaseURL(null,
-						mReplies, "text/html", "UTF-8", null);
-				mRepliesListView.getSettings().setLayoutAlgorithm(
-						LayoutAlgorithm.SINGLE_COLUMN);
-				
-				noreplyView.setVisibility(View.GONE);
-				
-			}
-    }
+		if (replyNum == 0) {
+			mRepliesListView.setVisibility(View.GONE);
+			noreplyView.setVisibility(View.VISIBLE);
+		} else {
+			mReplies = mContent.get(ApiClient.KEY_REPLIES);
+			mRepliesListView.setVisibility(View.VISIBLE);
+			mRepliesListView.loadDataWithBaseURL(null, mReplies, "text/html",
+					"UTF-8", null);
+			mRepliesListView.getSettings().setLayoutAlgorithm(
+					LayoutAlgorithm.SINGLE_COLUMN);
+
+			noreplyView.setVisibility(View.GONE);
+
+		}
+	}
 }
