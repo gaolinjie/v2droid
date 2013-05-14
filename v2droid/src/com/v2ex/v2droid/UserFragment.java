@@ -197,7 +197,7 @@ public class UserFragment extends Fragment {
 					if (userAvatar == null) {
 						String urlAvatar = "http://v2ex.com/member/" + userID;
 						Document docAvatar = ApiClient
-								.get(ac, urlAvatar, URLs.HOST);
+								.get(ac, urlAvatar, URLs.HOST).parse();
 						userAvatar = ApiClient.getUserAvatar(ac, docAvatar);
 						if (userAvatar != null) {
 							userAvatar = userAvatar.replace("large", "normal");
@@ -205,7 +205,7 @@ public class UserFragment extends Fragment {
 							userAvatar = "";
 						}
 					}
-					doc = ApiClient.get(ac, url, URLs.HOST);
+					doc = ApiClient.get(ac, url, URLs.HOST).parse();
 					bIsLastPageTopic = ApiClient.getUserTopics(ac, doc, tempList, userAvatar);
 				} catch (IOException e) {
 				}
@@ -273,7 +273,7 @@ public class UserFragment extends Fragment {
 					ac = (AppContext) getActivity().getApplication();
 					tempList.clear();
 					try {
-						docReplies = ApiClient.get(ac, url, URLs.HOST);
+						docReplies = ApiClient.get(ac, url, URLs.HOST).parse();
 						bIsLastPageReply = ApiClient.getUserReplies(ac, docReplies, tempList);
 					} catch (IOException e) {
 					}

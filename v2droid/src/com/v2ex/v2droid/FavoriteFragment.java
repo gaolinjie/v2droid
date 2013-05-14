@@ -143,7 +143,7 @@ public class FavoriteFragment extends Fragment {
 				AppContext ac = (AppContext) getActivity().getApplication();			
 				tempList.clear();
 				try {
-					doc = ApiClient.get(ac, url, URLs.HOST);
+					doc = ApiClient.get(ac, url, URLs.HOST).parse();
 					ApiClient.getFavorites(ac, doc, tempList);
 					
 				} catch (IOException e) {		

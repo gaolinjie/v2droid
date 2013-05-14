@@ -87,7 +87,7 @@ public class ReplyActivity extends Activity {
 			Document doc;
 			
 			try {
-				doc = ApiClient.get(ac, url, URLs.HOST);
+				doc = ApiClient.get(ac, url, URLs.HOST).parse();
 				response = ApiClient.reply(ac, url, content, once);
 				
 			} catch (IOException e) {

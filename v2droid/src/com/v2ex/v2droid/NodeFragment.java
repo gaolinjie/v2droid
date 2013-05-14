@@ -190,7 +190,7 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 				AppContext ac = (AppContext) getActivity().getApplication();
 				tempList.clear();
 				try {
-					doc = ApiClient.get(ac, url, URLs.HOST);
+					doc = ApiClient.get(ac, url, URLs.HOST).parse();
 					ApiClient.getHotNodes(ac, doc, tempList);
 					
 					if (!tempList.isEmpty()) {

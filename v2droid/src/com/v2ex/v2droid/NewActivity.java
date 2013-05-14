@@ -106,7 +106,7 @@ public class NewActivity extends Activity {
 			Document doc;
 
 			try {
-				doc = ApiClient.get(ac, url, URLs.HOST);
+				doc = ApiClient.get(ac, url, URLs.HOST).parse();
 				response = ApiClient.newTopic(ac, url, title, content);
 
 			} catch (IOException e) {
@@ -143,7 +143,7 @@ public class NewActivity extends Activity {
 					AppContext ac = (AppContext) getApplication();
 					Document doc;
 					try {
-						doc = ApiClient.get(ac, url, URLs.HOST);
+						doc = ApiClient.get(ac, url, URLs.HOST).parse();
 						NODES = ApiClient.getAllNodes(ac, doc, nodeList);
 
 						if (!nodeList.isEmpty()) {

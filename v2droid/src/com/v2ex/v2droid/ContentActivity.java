@@ -3,9 +3,11 @@ package com.v2ex.v2droid;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.apache.http.HttpStatus;
 import org.holoeverywhere.app.Activity;
 import org.holoeverywhere.widget.LinearLayout;
 import org.holoeverywhere.widget.TextView;
+import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -51,6 +53,9 @@ public class ContentActivity extends Activity {
 
 	String topicID;
 	String nodeName;
+	String fav="";
+	boolean isFav = false;
+	boolean favSuccess = false;
 
 	TextView title_text;
 	WebView content_text;
@@ -113,15 +118,17 @@ public class ContentActivity extends Activity {
 					mFavImageView.setImageResource(R.drawable.favourite_red);
 					mFavImageView.setTag(mContext
 							.getString(R.string.favourite_on));
-					Crouton.makeText((ContentActivity) mContext,
-							R.string.favourite_on, Style.ALERT).show();
+					//Crouton.makeText((ContentActivity) mContext,
+							//R.string.favourite_on, Style.ALERT).show();
 				} else {
 					mFavImageView.setImageResource(R.drawable.favourite);
 					mFavImageView.setTag(mContext
 							.getString(R.string.favourite_off));
-					Crouton.makeText((ContentActivity) mContext,
-							R.string.favourite_off, Style.CONFIRM).show();
+					//Crouton.makeText((ContentActivity) mContext,
+							//R.string.favourite_off, Style.CONFIRM).show();
 				}
+				
+				new GetDataTask3().execute();
 			}
 		});
 
@@ -207,7 +214,7 @@ public class ContentActivity extends Activity {
 			mContent = new HashMap<String, String>();
 
 			try {
-				doc = ApiClient.get(ac, url, URLs.HOST);
+				doc = ApiClient.get(ac, url, URLs.HOST).parse();
 				replyNum = ApiClient.getTopic(ac, doc, mContent);
 
 			} catch (IOException e) {
@@ -246,6 +253,68 @@ public class ContentActivity extends Activity {
 			super.onPostExecute(result);
 		}
 	}
+	
+	private class GetDataTask3 extends AsyncTask<Void, Void, String[]> {
+
+		@Override
+		protected String[] doInBackground(Void... params) {
+			String[] s = { "", "" };
+
+			String favUrl = "http://v2ex.com" + fav;
+			String refUrl = "http://v2ex.com/t/" + topicID;
+			AppContext ac = (AppContext) getApplication();
+			System.out.println("favUrl=====>" + favUrl);
+			System.out.println("refUrl=====>" + refUrl);
+			try {
+				Response response = ApiClient.get(ac, favUrl, refUrl);
+				System.out.println("reply response=====>" + response.statusCode());
+				if (response.statusCode() == 200) {
+					isFav = !isFav;
+					favSuccess = true;
+				} else {
+					favSuccess = false;
+				}
+			} catch (IOException e) {
+				System.out.println("IOException=====>");
+
+			}
+			return s;
+		}
+
+		@Override
+		protected void onPostExecute(String[] result) {
+			if (favSuccess) {
+				if (isFav) {
+					mFavImageView.setImageResource(R.drawable.favourite_red);
+					mFavImageView.setTag(mContext
+							.getString(R.string.favourite_on));
+					Crouton.makeText((ContentActivity) mContext,
+							R.string.favourite_on, Style.ALERT).show();
+				} else {
+					mFavImageView.setImageResource(R.drawable.favourite);
+					mFavImageView.setTag(mContext
+							.getString(R.string.favourite_off));
+					Crouton.makeText((ContentActivity) mContext,
+							R.string.favourite_off, Style.CONFIRM).show();
+				}
+			} else {
+				if (isFav) {
+					mFavImageView.setImageResource(R.drawable.favourite_red);
+					mFavImageView.setTag(mContext
+							.getString(R.string.favourite_on));
+				} else {
+					mFavImageView.setImageResource(R.drawable.favourite);
+					mFavImageView.setTag(mContext
+							.getString(R.string.favourite_off));
+				}
+				Crouton.makeText((ContentActivity) mContext,
+						R.string.favourite_failed, Style.INFO).show();
+			}
+			
+
+			super.onPostExecute(result);
+		}
+	}
 
 	private void updateUI() {
 		if (nodeName.isEmpty()) {
@@ -254,6 +323,21 @@ public class ContentActivity extends Activity {
 		}
 		
 		scrollView.scrollTo(10, 10);	
+		
+		fav = mContent.get(ApiClient.KEY_FAV);
+		if (fav!=null) {
+			isFav = fav.contains("unfavorite");
+			if (isFav) {
+				mFavImageView.setImageResource(R.drawable.favourite_red);
+				mFavImageView.setTag(mContext
+						.getString(R.string.favourite_on));
+			} else {
+				mFavImageView.setImageResource(R.drawable.favourite);
+				mFavImageView.setTag(mContext
+						.getString(R.string.favourite_off));
+			}
+		}
+
 		once = mContent.get(ApiClient.KEY_ONCE);
 
 		title_text.setText(mContent.get(ApiClient.KEY_TITLE));

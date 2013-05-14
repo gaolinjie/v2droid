@@ -161,7 +161,7 @@ public class MessageFragment extends Fragment {
 				Document doc;
 				tempList.clear();	
 				try {
-					doc = ApiClient.get(ac, url, URLs.HOST);
+					doc = ApiClient.get(ac, url, URLs.HOST).parse();
 					bIsLastPage = ApiClient.getMessages(ac, doc, tempList);	
 				} catch (IOException e) {
 					

@@ -64,6 +64,7 @@ public class ApiClient {
 	static final String KEY_FAVORITE = "favorite";
 	static final String KEY_FLOOR = "floor";
 	static final String KEY_ONCE = "once";
+	static final String KEY_FAV = "fav";
 
 	private static Map<String, String> mCookies = new HashMap<String, String>();
 
@@ -108,7 +109,7 @@ public class ApiClient {
 		}
 	}
 
-	public static Document get(AppContext appContext, String url,
+	public static Response get(AppContext appContext, String url,
 			String referrer) throws IOException {
 		Map<String, String> cookies = getCookies(appContext);
 		String userAgent = getUserAgent(appContext);
@@ -119,7 +120,7 @@ public class ApiClient {
 		Response response = connection.execute();
 		cookies.putAll(response.cookies());
 		mCookies = cookies;
-		return response.parse();
+		return response;
 	}
 
 	public static Document getWithoutUserAgent(AppContext appContext,
@@ -179,7 +180,7 @@ public class ApiClient {
 	public static boolean login(AppContext appContext, String username,
 			String password) throws IOException {
 		String once = getOnce(get(appContext, URLs.LOGIN_VALIDATE_HTTP,
-				URLs.HOST));
+				URLs.HOST).parse());
 
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("next", "/"));
@@ -202,7 +203,7 @@ public class ApiClient {
 
 	public static Response newTopic(AppContext appContext, String url,
 			String title, String content) throws IOException {
-		String once = getOnce(get(appContext, url, URLs.HOST));
+		String once = getOnce(get(appContext, url, URLs.HOST).parse());
 
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("title", title));
@@ -748,6 +749,9 @@ public class ApiClient {
 		if (!elsOnce.isEmpty()) {
 			once = elsOnce.get(0).attr("value");
 		}
+		
+		Element favElement = doc.select("a[class=op]").get(0);
+		String fav = favElement.attr("href");
 
 		content.put(KEY_AVATAR, avatar);
 		content.put(KEY_TITLE, title);
@@ -757,6 +761,7 @@ public class ApiClient {
 		content.put(KEY_CONTENT, contentStr);
 		content.put(KEY_FAVORITE, favorite);
 		content.put(KEY_ONCE, once);
+		content.put(KEY_FAV, fav);
 
 		int replyNum = 0;
 		if (doc.select("div[class=box transparent]").isEmpty()) {
