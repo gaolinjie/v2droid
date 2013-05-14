@@ -169,8 +169,10 @@ public class TopicFragment extends Fragment {
 				recentPageNum++;
 				mAdapter.notifyDataSetChanged();
 			} else {
-				Toast.makeText(getActivity().getApplicationContext(),
-						"貌似网络不给力啊...", Toast.LENGTH_SHORT).show();
+				if (getActivity()!=null) {
+					Toast.makeText(getActivity().getApplicationContext(),
+							"貌似网络不给力啊...", Toast.LENGTH_SHORT).show();
+				}
 			}
 
 			progressBar.setVisibility(View.GONE);

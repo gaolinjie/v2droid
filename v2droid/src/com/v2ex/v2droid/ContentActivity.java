@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.holoeverywhere.app.Activity;
+import org.holoeverywhere.widget.LinearLayout;
 import org.holoeverywhere.widget.TextView;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -15,6 +16,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebSettings.LayoutAlgorithm;
+import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -89,6 +91,10 @@ public class ContentActivity extends Activity {
 		}
 
 		mRepliesListView = (WebView) findViewById(R.id.replies_list);
+		mRepliesListView.getSettings().setJavaScriptEnabled(true);
+		mRepliesListView.getSettings().setPluginState(PluginState.ON);
+		mRepliesListView.getSettings().setPluginsEnabled(true);
+		mRepliesListView.setVisibility(View.VISIBLE);
 		mRepliesListView.setVisibility(View.GONE);
 
 		noreplyView = (TextView) findViewById(R.id.noreply_text);
@@ -122,9 +128,21 @@ public class ContentActivity extends Activity {
 		// Setup the content and replies view
 		title_text = (TextView) findViewById(R.id.title);
 		content_text = (WebView) findViewById(R.id.content);
+		content_text.getSettings().setJavaScriptEnabled(true);
+		content_text.getSettings().setPluginState(PluginState.ON);
+		content_text.getSettings().setPluginsEnabled(true);
 		thumb_image = (ImageView) findViewById(R.id.user_image);
 		info_text = (TextView) findViewById(R.id.info_text);
 		bottom_text = (TextView) findViewById(R.id.bottom_text);
+		
+		LinearLayout avatar_layout = (LinearLayout) findViewById(R.id.avatar);
+		avatar_layout.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	Intent intent = new Intent(ContentActivity.this, UserActivity.class);
+				intent.putExtra("EXTRA_USER_ID", mContent.get(ApiClient.KEY_USERNAME));
+				startActivity(intent);  	
+            }
+        });
 	}
 
 	@Override
@@ -230,7 +248,12 @@ public class ContentActivity extends Activity {
 	}
 
 	private void updateUI() {
-		scrollView.scrollTo(10, 10);
+		if (nodeName.isEmpty()) {
+			nodeName = mContent.get(ApiClient.KEY_NODE);
+			getSupportActionBar().setTitle(nodeName);
+		}
+		
+		scrollView.scrollTo(10, 10);	
 		once = mContent.get(ApiClient.KEY_ONCE);
 
 		title_text.setText(mContent.get(ApiClient.KEY_TITLE));

@@ -222,8 +222,10 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 
 				nodeAdapter.notifyDataSetChanged();
 			} else {
-				Toast.makeText(getActivity().getApplicationContext(), "貌似网络不给力啊...",
-						Toast.LENGTH_SHORT).show();
+				if (getActivity()!=null) {
+					Toast.makeText(getActivity().getApplicationContext(),
+							"貌似网络不给力啊...", Toast.LENGTH_SHORT).show();
+				}
 			}
 
 			refresh.setActionView(null);

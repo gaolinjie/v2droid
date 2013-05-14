@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/list_selector" >
+    android:background="@drawable/list_selector"
+    android:descendantFocusability="blocksDescendants"  >
 
     <RelativeLayout
         android:id="@+id/dock_area"
@@ -58,9 +59,7 @@
                 android:id="@+id/message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dip"
-                android:focusable="true"
-                android:focusableInTouchMode="true" />
+                android:layout_margin="4dip" />
         </LinearLayout>
     </RelativeLayout>
 

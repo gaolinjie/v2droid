@@ -89,6 +89,7 @@ public class ApiClient {
 				// cookieStore.addCookie(cookie);
 				mCookies.put(cookie.getName(), cookie.getValue());
 				System.out.println("getCookies=====>" + cookie.getName());
+				System.out.println("getCookies=====>" + cookie.getExpiryDate());
 			}
 		}
 		return mCookies;
@@ -534,6 +535,10 @@ public class ApiClient {
 
 		int i = 0;
 		for (Element item : itemsDockArea) {
+			Element titleElement = item.select("span[class=gray]").select("a").get(0);
+			String href = titleElement.attr("href");
+			String id = getMatcher("/t/([\\d]+)", href);
+			
 			Element grayElement = item.select("span[class=gray]").get(0);
 			String gray = grayElement.text();
 
@@ -544,6 +549,7 @@ public class ApiClient {
 			String reply = replyElement.toString();
 
 			HashMap<String, String> map = new HashMap<String, String>();
+			map.put(KEY_ID, id);
 			map.put(KEY_GRAY, gray);
 			map.put(KEY_TIME, time);
 			map.put(KEY_REPLY, reply);
@@ -554,6 +560,7 @@ public class ApiClient {
 
 		HashMap<String, String> mapMore = new HashMap<String, String>();
 
+		mapMore.put(KEY_ID, MainActivity.MORE_TAG);
 		mapMore.put(KEY_GRAY, MainActivity.MORE_TAG);
 		mapMore.put(KEY_TIME, MainActivity.MORE_TAG);
 
@@ -612,19 +619,7 @@ public class ApiClient {
 
 		return messageNum;
 	}
-
-	public static String getMessages(AppContext appContext, Document doc) {
-		String messages = null;
-		Elements items = doc.select("div[class=box]");
-		if (!items.isEmpty()) {
-			messages = items.get(0).toString();
-		}
-
-		return messages;
-	}
-
 	
-
 	public static boolean getMessages(
 			AppContext appContext, Document doc,
 			ArrayList<HashMap<String, String>> messages) {
@@ -640,8 +635,15 @@ public class ApiClient {
 			Element avatarElement = item.select("img[class=avatar]").get(0);
 			String avatar = avatarElement.attr("src");
 
+			Element usernameElement = item.select("span[class=fade]").select("a").get(0);
+			String username = usernameElement.text();
+			
 			Element titleElement = item.select("span[class=fade]").get(0);
 			String title = titleElement.text();
+			
+			Element tidElement = item.select("span[class=fade]").select("a").get(1);
+			String href = tidElement.attr("href");
+			String tid = getMatcher("/t/([\\d]+)", href);
 
 			Element timeElement = item.select("span[class=snow]").get(0);
 			String time = timeElement.text();
@@ -655,7 +657,9 @@ public class ApiClient {
 			// adding each child node to HashMap key =>
 			// value
 			map.put(KEY_AVATAR, avatar);
+			map.put(KEY_USERNAME, username);
 			map.put(KEY_TITLE, title);
+			map.put(KEY_ID, tid);
 			map.put(KEY_TIME, time);
 			map.put(KEY_MESSAGE, message);
 
@@ -669,6 +673,8 @@ public class ApiClient {
 		mapMore.put(KEY_AVATAR, MainActivity.MORE_TAG);
 		mapMore.put(KEY_TIME, MainActivity.MORE_TAG);
 		mapMore.put(KEY_MESSAGE, MainActivity.MORE_TAG);
+		mapMore.put(KEY_USERNAME, MainActivity.MORE_TAG);
+		mapMore.put(KEY_ID, MainActivity.MORE_TAG);
 
 		if (items.isEmpty() && messages.isEmpty()) {
 			mapMore.put(KEY_TITLE, "目前尚未有消息");
@@ -711,6 +717,14 @@ public class ApiClient {
 		Element elInfo = itemContent.select("div[class=header]")
 				.select("small[class=gray]").get(0);
 		String info = elInfo.text();
+		
+		Element elUsername = itemContent.select("div[class=header]")
+				.select("small[class=gray]").select("a").get(0);
+		String username = elUsername.text();
+		
+		Element elNode = itemContent.select("div[class=header]")
+				.select("a").get(2);
+		String node = elNode.text();
 
 		Elements elsContent = itemContent.select("div[class=topic_content]");
 		String contentStr = "";
@@ -737,7 +751,9 @@ public class ApiClient {
 
 		content.put(KEY_AVATAR, avatar);
 		content.put(KEY_TITLE, title);
+		content.put(KEY_NODE, node);
 		content.put(KEY_INFO, info);
+		content.put(KEY_USERNAME, username);
 		content.put(KEY_CONTENT, contentStr);
 		content.put(KEY_FAVORITE, favorite);
 		content.put(KEY_ONCE, once);

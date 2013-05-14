@@ -158,6 +158,15 @@ public class UserFragment extends Fragment {
 					if (repliesList.get(position).get(ApiClient.KEY_GRAY) == MainActivity.MORE_TAG) {
 						progressBarReplies.setVisibility(View.VISIBLE);
 						new GetDataTask2().execute();
+					} else {
+						String tid = repliesList.get(position).get(
+								TopicFragment.KEY_ID);
+						Intent contentIntent = new Intent(Intents.SHOW_CONTENT);
+						contentIntent.putExtra("EXTRA_TOPIC_ID", tid);
+						String node = "";
+						contentIntent.putExtra("EXTRA_NODE_NAME", node);
+						getActivity().startActivity(contentIntent);
+						
 					}
 				}
 			});
@@ -180,7 +189,9 @@ public class UserFragment extends Fragment {
 			if (!bIsLastPageTopic) {
 				String url = "http://v2ex.com/member/" + userID + "/topics?p="
 						+ recentPageNum;
-				AppContext ac = (AppContext) getActivity().getApplication();
+				AppContext ac;
+				if (getActivity()!=null) {
+					ac = (AppContext) getActivity().getApplication();
 				tempList.clear();
 				try {
 					if (userAvatar == null) {
@@ -198,6 +209,7 @@ public class UserFragment extends Fragment {
 					bIsLastPageTopic = ApiClient.getUserTopics(ac, doc, tempList, userAvatar);
 				} catch (IOException e) {
 				}
+				}
 			} else {
 				bNotLoagTopic = true;
 			}
@@ -214,7 +226,7 @@ public class UserFragment extends Fragment {
 				return;
 			}
 			
-			if (tempList.size() > 1) {
+			if (tempList != null && tempList.size() > 1) {
 				if (bRefresh) {
 					topicList.clear();
 					bRefresh = false;
@@ -234,8 +246,10 @@ public class UserFragment extends Fragment {
 				recentPageNum++;
 				mAdapter.notifyDataSetChanged();
 			} else {
-				Toast.makeText(getActivity().getApplicationContext(),
-						"貌似网络不给力啊...", Toast.LENGTH_SHORT).show();
+				if (getActivity()!=null) {
+					Toast.makeText(getActivity().getApplicationContext(),
+							"貌似网络不给力啊...", Toast.LENGTH_SHORT).show();
+				}
 			}
 
 			if (refresh.getActionView() != null) {
@@ -254,13 +268,17 @@ public class UserFragment extends Fragment {
 			if (!bIsLastPageReply) {
 				String url = "http://v2ex.com/member/" + userID + "/replies?p="
 						+ recentRepliesPageNum;
-				AppContext ac = (AppContext) getActivity().getApplication();
-				tempList.clear();
-				try {
-					docReplies = ApiClient.get(ac, url, URLs.HOST);
-					bIsLastPageReply = ApiClient.getUserReplies(ac, docReplies, tempList);
-				} catch (IOException e) {
-				}
+				AppContext ac;
+				if (getActivity()!=null) {
+					ac = (AppContext) getActivity().getApplication();
+					tempList.clear();
+					try {
+						docReplies = ApiClient.get(ac, url, URLs.HOST);
+						bIsLastPageReply = ApiClient.getUserReplies(ac, docReplies, tempList);
+					} catch (IOException e) {
+					}
+				}	
+				
 			} else {
 				bNotLoagTopic = true;
 			}
@@ -278,7 +296,7 @@ public class UserFragment extends Fragment {
 				return;
 			}
 			
-			if (tempList.size() > 1) {
+			if (tempList != null && tempList.size() > 1) {
 				if (bRefresh) {
 					repliesList.clear();
 					bRefresh = false;
@@ -298,8 +316,10 @@ public class UserFragment extends Fragment {
 				recentRepliesPageNum++;
 				mRepliesAdapter.notifyDataSetChanged();
 			} else {
-				Toast.makeText(getActivity().getApplicationContext(),
-						"貌似网络不给力啊...", Toast.LENGTH_SHORT).show();
+				if (getActivity()!=null) {
+					Toast.makeText(getActivity().getApplicationContext(),
+							"貌似网络不给力啊...", Toast.LENGTH_SHORT).show();
+				}
 			}
 
 			if (refresh!= null && refresh.getActionView() != null) {

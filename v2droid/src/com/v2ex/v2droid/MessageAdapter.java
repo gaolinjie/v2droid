@@ -9,6 +9,7 @@ import org.holoeverywhere.widget.LinearLayout;
 import org.holoeverywhere.widget.TextView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings.LayoutAlgorithm;
@@ -91,6 +92,15 @@ public class MessageAdapter extends BaseAdapter {
             more.setText(messageData.get(ApiClient.KEY_TITLE));
             more.setVisibility(View.VISIBLE);
         }
+        
+        avatar_layout.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	System.out.println("thumb_image.setOnClickListener======>");
+            	Intent intent = new Intent(activity, UserActivity.class);
+				intent.putExtra("EXTRA_USER_ID", messageData.get(TopicFragment.KEY_USERNAME));
+				activity.startActivity(intent);  	
+            }
+        });
         
         return vi;
     }

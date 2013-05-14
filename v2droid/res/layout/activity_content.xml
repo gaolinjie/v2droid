@@ -28,7 +28,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
                 android:layout_margin="10dip"
-                android:background="@drawable/image_bg" >
+                android:background="@drawable/image_selector"  >
 
                 <ImageView
                     android:id="@+id/user_image"

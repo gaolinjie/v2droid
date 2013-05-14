@@ -86,6 +86,7 @@ public class MessageFragment extends Fragment {
         messageListView = (ListView) view
 				.findViewById(R.id.message_list);
         messageListView.setAdapter(mMessagesAdapter);
+        messageListView.setFocusable(true);
         
         messageListView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -98,6 +99,14 @@ public class MessageFragment extends Fragment {
 					
 					progressBar.setVisibility(View.VISIBLE);
 					new GetDataTask().execute();
+				} else {
+					String tid = messageList.get(position).get(
+							TopicFragment.KEY_ID);
+					
+					Intent contentIntent = new Intent(Intents.SHOW_CONTENT);
+					contentIntent.putExtra("EXTRA_TOPIC_ID", tid);
+					contentIntent.putExtra("EXTRA_NODE_NAME", "");
+					getActivity().startActivity(contentIntent);
 				}
 			}
 		});			
@@ -194,8 +203,10 @@ public class MessageFragment extends Fragment {
 				recentPageNum++;
 				mMessagesAdapter.notifyDataSetChanged();
 			} else {
-				Toast.makeText(getActivity().getApplicationContext(), "貌似网络不给力啊...",
-						Toast.LENGTH_SHORT).show();
+				if (getActivity()!=null) {
+					Toast.makeText(getActivity().getApplicationContext(),
+							"貌似网络不给力啊...", Toast.LENGTH_SHORT).show();
+				}
 			}
 
 			refresh.setActionView(null);
