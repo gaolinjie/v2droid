@@ -183,7 +183,7 @@ public class MainActivity extends SlidingActivity {
 		adapter.add(MessageFragment.class, R.string.message);
 		adapter.add(FavoriteFragment.class, R.string.favorite);
 		adapter.add(NodeFragment.class, R.string.node);
-		adapter.add(AboutFragment.class, R.string.setting);
+		adapter.add(SettingFragmen.class, R.string.setting);
 		adapter.add(AboutFragment.class, R.string.about);
 
 		NavigationWidget navigationWidget = new NavigationWidget(this);

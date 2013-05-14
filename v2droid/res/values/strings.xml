@@ -17,8 +17,9 @@
     <string name="content">内容</string>
     <string name="favourite_on">收藏成功</string>
     <string name="favourite_off">取消收藏</string>
-    <string name="favourite_failed">操作没成功</string>
+    <string name="favourite_failed">操作失败</string>
     <string name="login">登入</string>
+    <string name="logout">登出</string>
     <string name="username_text">用户名</string>
     <string name="password_text">密码</string>
     <string name="more">More...</string>
