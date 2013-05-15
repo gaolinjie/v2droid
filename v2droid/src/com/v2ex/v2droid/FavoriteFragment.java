@@ -159,8 +159,8 @@ public class FavoriteFragment extends Fragment {
 		protected void onPostExecute(String[] result) {
 			progressBar.setVisibility(View.GONE);
 			if (bNotLoag) {				
-				Toast.makeText(getActivity().getApplicationContext(), "没有更多啦...",
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity().getApplicationContext(), R.string.no_more,
+						Toast.LENGTH_LONG).show();
 				return;
 			}
 			
@@ -185,8 +185,8 @@ public class FavoriteFragment extends Fragment {
 				mAdapter.notifyDataSetChanged();
 			} else {
 				if (getActivity()!=null) {
-					Toast.makeText(getActivity().getApplicationContext(),
-							"貌似网络不给力啊...", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity().getApplicationContext(), R.string.load_failed,
+					Toast.LENGTH_LONG).show();
 				}
 			}
 			

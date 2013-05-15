@@ -128,8 +128,8 @@ public class NewActivity extends Activity {
 			if (response != null && response.statusCode() == 200) {
 				NewActivity.this.finish();
 			} else {
-				Toast.makeText(getApplicationContext(), "对不住啊，好像没发成功...",
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), R.string.send_failed,
+						Toast.LENGTH_LONG).show();
 			}
 			refresh.setActionView(null);
 

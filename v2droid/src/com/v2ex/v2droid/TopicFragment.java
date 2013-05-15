@@ -170,8 +170,8 @@ public class TopicFragment extends Fragment {
 				mAdapter.notifyDataSetChanged();
 			} else {
 				if (getActivity()!=null) {
-					Toast.makeText(getActivity().getApplicationContext(),
-							"貌似网络不给力啊...", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity().getApplicationContext(), R.string.load_failed,
+					Toast.LENGTH_LONG).show();
 				}
 			}
 

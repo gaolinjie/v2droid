@@ -7,6 +7,7 @@ import org.apache.http.HttpStatus;
 import org.holoeverywhere.app.Activity;
 import org.holoeverywhere.widget.LinearLayout;
 import org.holoeverywhere.widget.TextView;
+import org.holoeverywhere.widget.Toast;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -42,7 +43,7 @@ public class ContentActivity extends Activity {
 	public ImageLoader mImageLoader = null;
 	private static Integer mRepliesCount = 0;
 	View contentView;
-	ScrollView scrollView;  
+	ScrollView scrollView;
 
 	// Replies HashMap Key
 	static final String KEY_ID = "id";
@@ -53,7 +54,7 @@ public class ContentActivity extends Activity {
 
 	String topicID;
 	String nodeName;
-	String fav="";
+	String fav = "";
 	boolean isFav = false;
 	boolean favSuccess = false;
 
@@ -81,8 +82,8 @@ public class ContentActivity extends Activity {
 		// ab.setTitle(R.string.app_name);
 		ab.setDisplayHomeAsUpEnabled(true);
 
-		scrollView = (ScrollView) findViewById(R.id.ScrollView);  
-		
+		scrollView = (ScrollView) findViewById(R.id.ScrollView);
+
 		mImageLoader = new ImageLoader(getApplicationContext());
 
 		Intent intent = getIntent();
@@ -118,16 +119,16 @@ public class ContentActivity extends Activity {
 					mFavImageView.setImageResource(R.drawable.favourite_red);
 					mFavImageView.setTag(mContext
 							.getString(R.string.favourite_on));
-					//Crouton.makeText((ContentActivity) mContext,
-							//R.string.favourite_on, Style.ALERT).show();
+					// Crouton.makeText((ContentActivity) mContext,
+					// R.string.favourite_on, Style.ALERT).show();
 				} else {
 					mFavImageView.setImageResource(R.drawable.favourite);
 					mFavImageView.setTag(mContext
 							.getString(R.string.favourite_off));
-					//Crouton.makeText((ContentActivity) mContext,
-							//R.string.favourite_off, Style.CONFIRM).show();
+					// Crouton.makeText((ContentActivity) mContext,
+					// R.string.favourite_off, Style.CONFIRM).show();
 				}
-				
+
 				new GetDataTask3().execute();
 			}
 		});
@@ -141,15 +142,17 @@ public class ContentActivity extends Activity {
 		thumb_image = (ImageView) findViewById(R.id.user_image);
 		info_text = (TextView) findViewById(R.id.info_text);
 		bottom_text = (TextView) findViewById(R.id.bottom_text);
-		
+
 		LinearLayout avatar_layout = (LinearLayout) findViewById(R.id.avatar);
 		avatar_layout.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-            	Intent intent = new Intent(ContentActivity.this, UserActivity.class);
-				intent.putExtra("EXTRA_USER_ID", mContent.get(ApiClient.KEY_USERNAME));
-				startActivity(intent);  	
-            }
-        });
+			public void onClick(View v) {
+				Intent intent = new Intent(ContentActivity.this,
+						UserActivity.class);
+				intent.putExtra("EXTRA_USER_ID",
+						mContent.get(ApiClient.KEY_USERNAME));
+				startActivity(intent);
+			}
+		});
 	}
 
 	@Override
@@ -253,7 +256,7 @@ public class ContentActivity extends Activity {
 			super.onPostExecute(result);
 		}
 	}
-	
+
 	private class GetDataTask3 extends AsyncTask<Void, Void, String[]> {
 
 		@Override
@@ -267,7 +270,8 @@ public class ContentActivity extends Activity {
 			System.out.println("refUrl=====>" + refUrl);
 			try {
 				Response response = ApiClient.get(ac, favUrl, refUrl);
-				System.out.println("reply response=====>" + response.statusCode());
+				System.out.println("reply response=====>"
+						+ response.statusCode());
 				if (response.statusCode() == 200) {
 					isFav = !isFav;
 					favSuccess = true;
@@ -310,31 +314,36 @@ public class ContentActivity extends Activity {
 				Crouton.makeText((ContentActivity) mContext,
 						R.string.favourite_failed, Style.INFO).show();
 			}
-			
 
 			super.onPostExecute(result);
 		}
 	}
 
 	private void updateUI() {
+		if (mContent.get(ApiClient.KEY_NODE) == null) {
+
+			Toast.makeText(getApplicationContext(), R.string.load_failed,
+					Toast.LENGTH_LONG).show();
+			return;
+		}
+
 		if (nodeName.isEmpty()) {
 			nodeName = mContent.get(ApiClient.KEY_NODE);
 			getSupportActionBar().setTitle(nodeName);
 		}
-		
-		scrollView.scrollTo(10, 10);	
-		
+
+		scrollView.scrollTo(10, 10);
+
 		fav = mContent.get(ApiClient.KEY_FAV);
-		if (fav!=null) {
+		if (fav != null) {
 			isFav = fav.contains("unfavorite");
 			if (isFav) {
 				mFavImageView.setImageResource(R.drawable.favourite_red);
-				mFavImageView.setTag(mContext
-						.getString(R.string.favourite_on));
+				mFavImageView.setTag(mContext.getString(R.string.favourite_on));
 			} else {
 				mFavImageView.setImageResource(R.drawable.favourite);
-				mFavImageView.setTag(mContext
-						.getString(R.string.favourite_off));
+				mFavImageView
+						.setTag(mContext.getString(R.string.favourite_off));
 			}
 		}
 

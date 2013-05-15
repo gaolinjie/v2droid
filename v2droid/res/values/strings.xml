@@ -47,5 +47,8 @@
     <string name="content">内容</string>
     <string name="message">消息</string>
     <string name="select_email_programm">选择email程序</string>
+    <string name="load_failed">对不住，没加载成功，刷新一下试试～～</string>
+    <string name="no_more">没有更多啦...</string>
+    <string name="send_failed">sorry，好像没发成功...</string>
 
 </resources>

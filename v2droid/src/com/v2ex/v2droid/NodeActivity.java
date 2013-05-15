@@ -168,8 +168,8 @@ public class NodeActivity extends Activity {
 		protected void onPostExecute(String[] result) {
 			progressBar.setVisibility(View.GONE);
 			if (bNotLoag) {
-				Toast.makeText(getApplicationContext(), "没有更多啦...",
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), R.string.no_more,
+						Toast.LENGTH_LONG).show();
 				return;
 			}
 
@@ -194,8 +194,8 @@ public class NodeActivity extends Activity {
 				recentPageNum++;
 				mAdapter.notifyDataSetChanged();
 			} else {
-				Toast.makeText(getApplicationContext(), "貌似网络不给力啊...",
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), R.string.load_failed,
+					Toast.LENGTH_LONG).show();
 			}
 
 			refresh.setActionView(null);
