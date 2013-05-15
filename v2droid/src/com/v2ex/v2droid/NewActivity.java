@@ -16,6 +16,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -37,7 +39,7 @@ public class NewActivity extends Activity {
 
 	private static String[] NODES = new String[] {};
 	ArrayList<HashMap<String, String>> nodeList = null;
-	
+
 	private MenuItem refresh;
 
 	@Override
@@ -71,6 +73,10 @@ public class NewActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
+			((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE))
+					.hideSoftInputFromWindow(NewActivity.this.getCurrentFocus()
+							.getWindowToken(),
+							InputMethodManager.HIDE_NOT_ALWAYS);
 			finish();
 			break;
 
@@ -91,11 +97,12 @@ public class NewActivity extends Activity {
 		protected String[] doInBackground(Void... params) {
 			String[] s = { "", "" };
 
-			System.out.println("nodeEdit.getText().toString()=====>" + nodeEdit.getText().toString());
+			System.out.println("nodeEdit.getText().toString()=====>"
+					+ nodeEdit.getText().toString());
 			link = getNodeLinkByName(nodeEdit.getText().toString());
-			link = link.replaceAll("/go/", "/"); 
+			link = link.replaceAll("/go/", "/");
 			String url = "http://v2ex.com/new" + link;
-			
+
 			System.out.println("url=====>" + url);
 
 			title = titleEdit.getText().toString();
@@ -121,8 +128,8 @@ public class NewActivity extends Activity {
 			if (response != null && response.statusCode() == 200) {
 				NewActivity.this.finish();
 			} else {
-				Toast.makeText(getApplicationContext(),
-						"对不住啊，好像没发成功...", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "对不住啊，好像没发成功...",
+						Toast.LENGTH_SHORT).show();
 			}
 			refresh.setActionView(null);
 

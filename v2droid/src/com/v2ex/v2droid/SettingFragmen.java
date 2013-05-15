@@ -7,6 +7,7 @@ import org.holoeverywhere.app.Fragment;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -35,7 +36,7 @@ public class SettingFragmen extends Fragment {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.dismiss();
-					//ConfigurationActivity.this.finish();
+					logout();
 				}
 			});
 			builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -111,5 +112,16 @@ public class SettingFragmen extends Fragment {
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+    
+    public void logout() {
+    	AppConfig.setLogin(getActivity(), false);
+    	AppConfig.setUsername(getActivity(), "");
+    	AppConfig.setPassword(getActivity(), "");
+    	AppConfig.setMessageNum(getActivity(), "");
+    	
+    	Intent intent = new Intent(getActivity(), LoginActivity.class);
+    	getActivity().startActivity(intent);
+    	getActivity().finish();
     }
 }

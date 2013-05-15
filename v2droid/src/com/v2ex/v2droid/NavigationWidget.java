@@ -40,8 +40,6 @@ public class NavigationWidget extends LinearLayout {
         int themePicker = 0;
         if (ThemeManager.isDark(theme)) {
             themePicker = R.id.themePickerDark;
-        } else if (ThemeManager.isLight(theme)) {
-            themePicker = R.id.themePickerLight;
         }
         ((NavigationItem) findViewById(themePicker))
                 .setSelectionHandlerColorResource(R.color.holo_green_light);

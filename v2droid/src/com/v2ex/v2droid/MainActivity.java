@@ -84,6 +84,10 @@ public class MainActivity extends SlidingActivity {
 			int preSelected = preSelectedItem;
 			preSelectedItem = lastSelectedItem;
 			lastSelectedItem = itemPosition;
+			
+			if (preSelected >=0 && preSelectedItem == lastSelectedItem) {
+				return;
+			}
 
 			getIntent().putExtra(LIST_NAVIGATION_PAGE, itemPosition);
 

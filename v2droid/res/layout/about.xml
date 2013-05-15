@@ -9,10 +9,10 @@
 		android:divider="?android:listDivider"
 		android:orientation="vertical" >
 		<NavigationItem
-			android:id="@+id/github"
+			android:id="@+id/v2ex"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="@string/github"
+			android:text="@string/v2ex"
 			android:color="@color/holo_blue_light" />
 		<NavigationItem
 			android:id="@+id/developers"

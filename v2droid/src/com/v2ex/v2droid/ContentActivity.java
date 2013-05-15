@@ -99,7 +99,7 @@ public class ContentActivity extends Activity {
 		mRepliesListView.getSettings().setJavaScriptEnabled(true);
 		mRepliesListView.getSettings().setPluginState(PluginState.ON);
 		mRepliesListView.getSettings().setPluginsEnabled(true);
-		mRepliesListView.setVisibility(View.VISIBLE);
+
 		mRepliesListView.setVisibility(View.GONE);
 
 		noreplyView = (TextView) findViewById(R.id.noreply_text);

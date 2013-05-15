@@ -35,7 +35,8 @@
 		</activity>
 		<activity
             android:name=".ContentActivity"
-            android:label="@string/content" >
+            android:label="@string/content"
+            android:hardwareAccelerated="true" >
             <intent-filter>
                 <action android:name="com.v2ex.v2droid.action.SHOW_CONTENT" />
 

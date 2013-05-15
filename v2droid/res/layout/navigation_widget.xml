@@ -25,11 +25,5 @@
 			android:layout_height="wrap_content"
 			android:onClick="setDarkTheme"
 			android:text="@string/dark" />
-		<NavigationItem
-			android:id="@+id/themePickerLight"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:onClick="setLightTheme"
-			android:text="@string/light" />
 	</LinearLayout>
 </LinearLayout>

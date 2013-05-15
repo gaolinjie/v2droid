@@ -46,17 +46,32 @@ public class AboutFragment extends Fragment {
         }
         return AboutFragment.instance;
     }
+    
+    private final class EmailListener implements OnClickListener {
+        private final String subject, to;
 
-    private final OnClickListener developersListener = new OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            //((MainActivity) getSupportActivity()).replaceFragment(DevelopersFragment.getInstance(),
-                    //"developers");
+        public EmailListener(String to, String subject) {
+            this.to = to;
+            this.subject = subject;
         }
-    };
 
-    private final OnClickListener githubListener = new UrlListener(
-            "https://github.com/ChristopheVersieux/HoloEverywhere");
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("message/rfc822");
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[] {
+                    to
+            });
+            intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+            intent = Intent.createChooser(intent, getText(R.string.select_email_programm));
+            if (intent != null) {
+                getActivity().startActivity(intent);
+            }
+        }
+    }
+
+    private final OnClickListener v2exListener = new UrlListener(
+            "https://v2ex.com/about");
 
     public AboutFragment() {
         AboutFragment.instance = this;
@@ -78,8 +93,9 @@ public class AboutFragment extends Fragment {
     @Override
     public void onViewCreated(View view) {
         super.onViewCreated(view);
-        //view.findViewById(R.id.github).setOnClickListener(githubListener);
-        //view.findViewById(R.id.developers).setOnClickListener(developersListener);
+        view.findViewById(R.id.v2ex).setOnClickListener(v2exListener);
+        view.findViewById(R.id.developers).setOnClickListener(new EmailListener(
+                "gaolinjie@gmail.com", "v2droid"));
     }
     
     @Override
