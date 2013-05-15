@@ -171,7 +171,7 @@ public class TopicFragment extends Fragment {
 			} else {
 				if (getActivity()!=null) {
 					Toast.makeText(getActivity().getApplicationContext(), R.string.load_failed,
-					Toast.LENGTH_LONG).show();
+					Toast.LENGTH_SHORT).show();
 				}
 			}
 

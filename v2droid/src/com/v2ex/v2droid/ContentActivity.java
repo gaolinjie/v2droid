@@ -323,7 +323,7 @@ public class ContentActivity extends Activity {
 		if (mContent.get(ApiClient.KEY_NODE) == null) {
 
 			Toast.makeText(getApplicationContext(), R.string.load_failed,
-					Toast.LENGTH_LONG).show();
+					Toast.LENGTH_SHORT).show();
 			return;
 		}
 

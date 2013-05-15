@@ -160,7 +160,7 @@ public class FavoriteFragment extends Fragment {
 			progressBar.setVisibility(View.GONE);
 			if (bNotLoag) {				
 				Toast.makeText(getActivity().getApplicationContext(), R.string.no_more,
-						Toast.LENGTH_LONG).show();
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 			
@@ -186,7 +186,7 @@ public class FavoriteFragment extends Fragment {
 			} else {
 				if (getActivity()!=null) {
 					Toast.makeText(getActivity().getApplicationContext(), R.string.load_failed,
-					Toast.LENGTH_LONG).show();
+					Toast.LENGTH_SHORT).show();
 				}
 			}
 			

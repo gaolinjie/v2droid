@@ -125,11 +125,15 @@ public class NewActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(String[] result) {
+			((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE))
+			.hideSoftInputFromWindow(NewActivity.this.getCurrentFocus()
+					.getWindowToken(),
+					InputMethodManager.HIDE_NOT_ALWAYS);
 			if (response != null && response.statusCode() == 200) {
 				NewActivity.this.finish();
 			} else {
 				Toast.makeText(getApplicationContext(), R.string.send_failed,
-						Toast.LENGTH_LONG).show();
+						Toast.LENGTH_SHORT).show();
 			}
 			refresh.setActionView(null);
 

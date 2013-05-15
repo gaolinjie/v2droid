@@ -169,7 +169,7 @@ public class NodeActivity extends Activity {
 			progressBar.setVisibility(View.GONE);
 			if (bNotLoag) {
 				Toast.makeText(getApplicationContext(), R.string.no_more,
-						Toast.LENGTH_LONG).show();
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 
@@ -195,7 +195,7 @@ public class NodeActivity extends Activity {
 				mAdapter.notifyDataSetChanged();
 			} else {
 				Toast.makeText(getApplicationContext(), R.string.load_failed,
-					Toast.LENGTH_LONG).show();
+					Toast.LENGTH_SHORT).show();
 			}
 
 			refresh.setActionView(null);

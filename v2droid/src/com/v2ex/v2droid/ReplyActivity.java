@@ -111,7 +111,7 @@ public class ReplyActivity extends Activity {
 				}
 			} else {
 				Toast.makeText(getApplicationContext(), R.string.send_failed,
-						Toast.LENGTH_LONG).show();
+						Toast.LENGTH_SHORT).show();
 			}
 			
 			refresh.setActionView(null);

@@ -224,7 +224,7 @@ public class NodeFragment extends Fragment implements OnItemClickListener {
 			} else {
 				if (getActivity()!=null) {
 					Toast.makeText(getActivity().getApplicationContext(), R.string.load_failed,
-					Toast.LENGTH_LONG).show();
+					Toast.LENGTH_SHORT).show();
 				}
 			}
 

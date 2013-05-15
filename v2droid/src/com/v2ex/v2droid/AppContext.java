@@ -59,33 +59,5 @@ public class AppContext extends Application {
 		}
 		return uniqueID;
 	}
-/*	
-	public boolean getLogin() {
-		if (!mIsLogin) {
-			mIsLogin = AppConfig.getAppConfig(this).getLogin();
-		}		
-		return mIsLogin;
-	}
-	
-	public String getUsername() {
-		if (mUsername==null && getLogin()) {
-			mUsername = AppConfig.getAppConfig(this).getUsername();
-		}		
-		return mUsername;
-	}
-	
-	public String getMessageNum() {
-		if (getLogin()) {
-			mMessageNum = AppConfig.getAppConfig(this).getMessageNum();
-		}		
-		return mMessageNum;
-	}
-	
-	public void setMessageNum(String n) {
-		if (n!=null) {
-			AppConfig.getAppConfig(this).setMessageNum(n);
-		}		
-
-	}*/
 
 }

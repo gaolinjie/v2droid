@@ -222,7 +222,7 @@ public class UserFragment extends Fragment {
 			progressBar.setVisibility(View.GONE);
 			if (bNotLoagTopic) {				
 				Toast.makeText(getActivity().getApplicationContext(), R.string.no_more,
-						Toast.LENGTH_LONG).show();
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 			
@@ -248,7 +248,7 @@ public class UserFragment extends Fragment {
 			} else {
 				if (getActivity()!=null) {
 					Toast.makeText(getActivity().getApplicationContext(), R.string.load_failed,
-					Toast.LENGTH_LONG).show();
+					Toast.LENGTH_SHORT).show();
 				}
 			}
 
@@ -292,7 +292,7 @@ public class UserFragment extends Fragment {
 			progressBarReplies.setVisibility(View.GONE);
 			if (bNotLoagTopic) {				
 				Toast.makeText(getActivity().getApplicationContext(), R.string.no_more,
-						Toast.LENGTH_LONG).show();
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 			
@@ -318,7 +318,7 @@ public class UserFragment extends Fragment {
 			} else {
 				if (getActivity()!=null) {
 					Toast.makeText(getActivity().getApplicationContext(), R.string.load_failed,
-					Toast.LENGTH_LONG).show();
+					Toast.LENGTH_SHORT).show();
 				}
 			}
 
